@@ -12,6 +12,8 @@
   const PAGE_CLASS = "hn-editorial-page";
   const LISTING_CLASS = "hn-editorial-listing";
   const DISCUSSION_CLASS = "hn-editorial-discussion";
+  const LIGHT_THEME_CLASS = "hn-theme-light";
+  const THEME_STORAGE_KEY = "hn-editorial-theme";
 
   const currentPath = window.location.pathname.replace(/\/+$/, "") || "/news";
 
@@ -37,6 +39,59 @@
     "/threads": "Threads",
     "/favorites": "Favorites"
   };
+
+  function getPreferredTheme() {
+    const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
+
+    if (storedTheme === "light" || storedTheme === "dark") {
+      return storedTheme;
+    }
+
+    return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+  }
+
+  function applyTheme(theme) {
+    document.body.classList.toggle(LIGHT_THEME_CLASS, theme === "light");
+    document.documentElement.style.colorScheme = theme;
+  }
+
+  function syncThemeToggle(theme) {
+    const toggle = document.getElementById("hn-editorial-theme-toggle");
+
+    if (!toggle) {
+      return;
+    }
+
+    toggle.textContent = theme === "light" ? "Dark" : "Light";
+    toggle.setAttribute("aria-label", theme === "light" ? "Switch to dark mode" : "Switch to light mode");
+    toggle.setAttribute("data-theme", theme);
+  }
+
+  function initializeTheme() {
+    const theme = getPreferredTheme();
+    applyTheme(theme);
+    return theme;
+  }
+
+  function setupThemeToggle() {
+    const toggle = document.getElementById("hn-editorial-theme-toggle");
+
+    if (!toggle || toggle.dataset.bound === "true") {
+      syncThemeToggle(getPreferredTheme());
+      return;
+    }
+
+    toggle.dataset.bound = "true";
+    syncThemeToggle(getPreferredTheme());
+
+    toggle.addEventListener("click", () => {
+      const currentTheme = document.body.classList.contains(LIGHT_THEME_CLASS) ? "light" : "dark";
+      const nextTheme = currentTheme === "light" ? "dark" : "light";
+      window.localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
+      applyTheme(nextTheme);
+      syncThemeToggle(nextTheme);
+    });
+  }
 
   function ensureStyle() {
     let styleTag = document.getElementById(STYLE_ID);
@@ -66,11 +121,26 @@
         --hn-mono: "SFMono-Regular", "Menlo", "Consolas", monospace;
       }
 
+      body.${LIGHT_THEME_CLASS} {
+        --hn-bg: #f4efe4;
+        --hn-bg-elevated: rgba(255, 251, 245, 0.95);
+        --hn-panel: rgba(255, 252, 246, 0.92);
+        --hn-panel-strong: rgba(255, 255, 251, 0.98);
+        --hn-text: #1c2428;
+        --hn-muted: #5c6a70;
+        --hn-accent-soft: rgba(245, 158, 11, 0.12);
+        --hn-line: rgba(28, 36, 40, 0.12);
+        --hn-line-strong: rgba(245, 158, 11, 0.24);
+        --hn-shadow: 0 24px 70px rgba(113, 91, 52, 0.14);
+      }
+
+      html,
+      body {
+        min-height: 100%;
+      }
+
       html {
-        background:
-          radial-gradient(circle at top left, rgba(245, 158, 11, 0.13), transparent 24%),
-          radial-gradient(circle at top right, rgba(59, 130, 246, 0.08), transparent 22%),
-          linear-gradient(180deg, #0a1418 0%, #081216 42%, #050d11 100%) !important;
+        background: var(--hn-bg) !important;
       }
 
       body,
@@ -82,6 +152,17 @@
         margin: 0 !important;
         color: var(--hn-text) !important;
         font-family: var(--hn-sans) !important;
+        background:
+          radial-gradient(circle at top left, rgba(245, 158, 11, 0.13), transparent 24%),
+          radial-gradient(circle at top right, rgba(59, 130, 246, 0.08), transparent 22%),
+          linear-gradient(180deg, #0a1418 0%, #081216 42%, #050d11 100%) !important;
+      }
+
+      body.${LIGHT_THEME_CLASS} {
+        background:
+          radial-gradient(circle at top left, rgba(245, 158, 11, 0.14), transparent 24%),
+          radial-gradient(circle at top right, rgba(14, 165, 233, 0.08), transparent 22%),
+          linear-gradient(180deg, #f6f1e7 0%, #f2ece1 42%, #eee7db 100%) !important;
       }
 
       body.${PAGE_CLASS} {
@@ -97,6 +178,22 @@
         display: none !important;
       }
 
+      body > center {
+        display: block !important;
+        width: 100% !important;
+      }
+
+      tr#bigbox {
+        display: block !important;
+        width: 100% !important;
+      }
+
+      tr#bigbox > td {
+        display: block !important;
+        width: 100% !important;
+        padding: 0 !important;
+      }
+
       #${TOPBAR_ID} {
         position: fixed;
         top: 0;
@@ -109,12 +206,23 @@
         border-bottom: 1px solid var(--hn-line);
       }
 
+      body.${LIGHT_THEME_CLASS} #${TOPBAR_ID} {
+        background: linear-gradient(180deg, rgba(247, 241, 232, 0.96), rgba(247, 241, 232, 0.82));
+      }
+
+      body.${LIGHT_THEME_CLASS} .hn-editorial-nav a:hover,
+      body.${LIGHT_THEME_CLASS} .hn-editorial-nav a:focus-visible,
+      body.${LIGHT_THEME_CLASS} .hn-editorial-theme-toggle:hover,
+      body.${LIGHT_THEME_CLASS} .hn-editorial-theme-toggle:focus-visible {
+        background: rgba(28, 36, 40, 0.05);
+      }
+
       .hn-editorial-topbar__inner {
         max-width: var(--hn-content-width);
         margin: 0 auto;
-        display: flex;
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
         align-items: center;
-        justify-content: space-between;
         gap: 24px;
       }
 
@@ -162,6 +270,13 @@
       .hn-editorial-nav {
         display: flex;
         flex-wrap: wrap;
+        justify-content: center;
+        gap: 4px;
+      }
+
+      .hn-editorial-actions {
+        display: flex;
+        align-items: center;
         justify-content: flex-end;
         gap: 8px;
       }
@@ -169,10 +284,10 @@
       .hn-editorial-nav a {
         color: var(--hn-muted);
         text-decoration: none;
-        font: 700 11px/1 var(--hn-sans);
-        letter-spacing: 0.04em;
+        font: 600 10px/1 var(--hn-sans);
+        letter-spacing: 0.05em;
         text-transform: uppercase;
-        padding: 10px 14px;
+        padding: 5px 9px;
         border-radius: 999px;
         border: 1px solid transparent;
         transition: color 160ms ease, border-color 160ms ease, background-color 160ms ease, transform 160ms ease;
@@ -193,15 +308,51 @@
         border-color: transparent;
       }
 
+      .hn-editorial-theme-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 56px;
+        height: 28px;
+        padding: 0 10px;
+        border-radius: 999px;
+        border: 1px solid var(--hn-line);
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--hn-text);
+        font: 600 10px/1 var(--hn-sans);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: background-color 160ms ease, border-color 160ms ease, transform 160ms ease;
+      }
+
+      .hn-editorial-theme-toggle:hover,
+      .hn-editorial-theme-toggle:focus-visible {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: var(--hn-line-strong);
+        transform: translateY(-1px);
+        outline: none;
+      }
+
+      body.${LISTING_CLASS} tr#bigbox > td > table,
       body.${LISTING_CLASS} table.itemlist {
+        display: block !important;
         width: 100% !important;
+        max-width: 780px !important;
+        margin: 0 auto !important;
         border-collapse: separate !important;
         border-spacing: 0 16px !important;
       }
 
+      body.${LISTING_CLASS} tr#bigbox > td > table > tbody,
+      body.${LISTING_CLASS} table.itemlist > tbody {
+        display: block !important;
+        width: 100% !important;
+      }
+
       body.${LISTING_CLASS} .athing {
         display: block !important;
-        max-width: var(--hn-content-width);
+        max-width: 780px;
         margin: 0 auto !important;
         padding: 14px 18px !important;
         border: 1px solid var(--hn-line);
@@ -223,13 +374,18 @@
 
       body.${LISTING_CLASS} .athing > td {
         display: grid !important;
-        grid-template-columns: 56px 1fr;
-        column-gap: 14px;
-        row-gap: 4px;
+        grid-template-columns: 32px 1fr;
+        grid-template-rows: auto auto;
+        column-gap: 12px;
+        row-gap: 6px;
         padding: 0 !important;
         width: 100%;
         box-sizing: border-box;
-        align-items: start;
+        align-items: center;
+      }
+
+      body.${LISTING_CLASS} .votelinks {
+        display: none !important;
       }
 
       body.${LISTING_CLASS} span.rank {
@@ -237,14 +393,14 @@
         display: inline-flex !important;
         align-items: center;
         justify-content: center;
-        width: 42px;
-        min-height: 42px;
-        padding: 0 6px;
-        border-radius: 14px;
+        width: 28px;
+        height: 28px;
+        padding: 0;
+        border-radius: 8px;
         background: var(--hn-accent-soft);
         border: 1px solid rgba(245, 158, 11, 0.18);
         color: #ffd386;
-        font: 700 13px/1 var(--hn-mono);
+        font: 700 11px/1 var(--hn-mono);
       }
 
       body.${LISTING_CLASS} .titleline {
@@ -256,7 +412,7 @@
       body.${LISTING_CLASS} .titleline > a {
         color: var(--hn-text);
         text-decoration: none;
-        font: 600 28px/1.18 var(--hn-serif);
+        font: 600 20px/1.3 var(--hn-serif);
         letter-spacing: -0.01em;
       }
 
@@ -271,9 +427,9 @@
       .hn-editorial-source {
         display: inline-flex;
         align-items: center;
-        gap: 6px;
-        height: 30px;
-        padding: 0 12px;
+        gap: 4px;
+        height: 22px;
+        padding: 0 8px;
         border: 1px solid var(--hn-line);
         border-radius: 999px;
         background: rgba(255, 255, 255, 0.03);
@@ -290,8 +446,9 @@
         align-items: center;
         justify-content: space-between;
         gap: 16px;
-        margin-top: 4px;
-        padding-top: 0;
+        margin-top: 10px;
+        padding-top: 8px;
+        border-top: 1px solid var(--hn-line);
         overflow: hidden;
         color: var(--hn-muted);
         font: 600 13px/1.5 var(--hn-sans);
@@ -372,9 +529,10 @@
       }
 
       body.${DISCUSSION_CLASS} .fatitem {
+        display: block !important;
         width: min(var(--hn-content-width), 100%);
-        margin: 0 auto 28px !important;
-        padding: 28px 28px 24px;
+        margin: 0 auto 40px !important;
+        padding: 36px 36px 32px;
         border-radius: 28px;
         border: 1px solid var(--hn-line);
         background:
@@ -383,6 +541,12 @@
           var(--hn-panel);
         box-shadow: var(--hn-shadow);
         box-sizing: border-box;
+      }
+
+      body.${DISCUSSION_CLASS} .fatitem > tbody,
+      body.${DISCUSSION_CLASS} .fatitem > tbody > tr {
+        display: block !important;
+        width: 100% !important;
       }
 
       body.${DISCUSSION_CLASS} .fatitem .athing {
@@ -394,10 +558,11 @@
         box-shadow: none !important;
       }
 
-      body.${DISCUSSION_CLASS} .fatitem .athing > td {
+      body.${DISCUSSION_CLASS} .fatitem td {
         display: block !important;
         padding: 0 !important;
-        width: auto !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
       }
 
       body.${DISCUSSION_CLASS} .fatitem span.rank,
@@ -428,7 +593,7 @@
         display: flex;
         flex-wrap: wrap;
         gap: 10px 14px;
-        margin-top: 18px;
+        margin-top: 24px;
         color: var(--hn-muted);
         font: 600 13px/1.5 var(--hn-sans);
       }
@@ -452,9 +617,9 @@
       }
 
       body.${DISCUSSION_CLASS} .fatitem .toptext {
-        margin-top: 18px;
+        margin-top: 26px;
         color: var(--hn-text);
-        font: 400 22px/1.7 var(--hn-serif);
+        font: 400 22px/1.85 var(--hn-serif);
       }
 
       body.${DISCUSSION_CLASS} .fatitem form {
@@ -477,12 +642,26 @@
       body.${DISCUSSION_CLASS} .comment-tree .athing.comtr,
       body.${DISCUSSION_CLASS} .comment-tree .comtr {
         display: block !important;
-        margin: 0 0 14px 0 !important;
-        padding: 18px 22px !important;
+        margin: 0 0 20px 0 !important;
+        padding: 24px 28px !important;
         border: 1px solid rgba(159, 177, 171, 0.1);
         border-radius: 22px;
         background: rgba(8, 20, 27, 0.72);
         box-shadow: none;
+      }
+
+      body.${LIGHT_THEME_CLASS}.${DISCUSSION_CLASS} .fatitem {
+        background:
+          radial-gradient(circle at top left, rgba(245, 158, 11, 0.05), transparent 28%),
+          linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(255, 253, 248, 0.96)),
+          var(--hn-panel);
+      }
+
+      body.${LIGHT_THEME_CLASS}.${DISCUSSION_CLASS} .comment-tree .athing.comtr,
+      body.${LIGHT_THEME_CLASS}.${DISCUSSION_CLASS} .comment-tree .comtr {
+        background: rgba(255, 251, 245, 0.96);
+        border-color: rgba(28, 36, 40, 0.1);
+        box-shadow: 0 14px 38px rgba(113, 91, 52, 0.08);
       }
 
       body.${DISCUSSION_CLASS} .comment-tree .comtr > td {
@@ -513,9 +692,20 @@
         display: flex;
         flex-wrap: wrap;
         gap: 8px 10px;
-        margin-bottom: 12px;
+        margin-bottom: 16px;
         color: var(--hn-muted);
         font: 600 12px/1.5 var(--hn-sans);
+      }
+
+      body.${LIGHT_THEME_CLASS}.${DISCUSSION_CLASS} .comment-tree .comhead,
+      body.${LIGHT_THEME_CLASS}.${DISCUSSION_CLASS} .comment-tree .navs,
+      body.${LIGHT_THEME_CLASS}.${DISCUSSION_CLASS} .comment-tree .reply,
+      body.${LIGHT_THEME_CLASS}.${DISCUSSION_CLASS} .fatitem .hn-editorial-meta,
+      body.${LIGHT_THEME_CLASS}.${DISCUSSION_CLASS} .fatitem .toptext + form,
+      body.${LIGHT_THEME_CLASS} .yclinks,
+      body.${LIGHT_THEME_CLASS} .yclinks *,
+      body.${LIGHT_THEME_CLASS} center > table:last-of-type tr td {
+        color: #5c6a70 !important;
       }
 
       body.${DISCUSSION_CLASS} .comment-tree .comhead a,
@@ -536,7 +726,15 @@
       body.${DISCUSSION_CLASS} .comment-tree .comment,
       body.${DISCUSSION_CLASS} .comment-tree .commtext {
         color: var(--hn-text);
-        font: 400 19px/1.75 var(--hn-serif);
+        font: 400 19px/1.85 var(--hn-serif);
+      }
+
+      body.${LIGHT_THEME_CLASS}.${DISCUSSION_CLASS} .comment-tree .comment,
+      body.${LIGHT_THEME_CLASS}.${DISCUSSION_CLASS} .comment-tree .commtext,
+      body.${LIGHT_THEME_CLASS}.${DISCUSSION_CLASS} .fatitem .toptext,
+      body.${LIGHT_THEME_CLASS}.${DISCUSSION_CLASS} .fatitem .titleline > a,
+      body.${LIGHT_THEME_CLASS} .titleline > a {
+        color: #1c2428;
       }
 
       body.${DISCUSSION_CLASS} .comment-tree .comment p:first-child,
@@ -554,7 +752,7 @@
 
       body.${DISCUSSION_CLASS} .comment-tree .navs,
       body.${DISCUSSION_CLASS} .comment-tree .reply {
-        margin-top: 12px;
+        margin-top: 18px;
         color: var(--hn-muted);
         font: 700 11px/1.4 var(--hn-sans);
         letter-spacing: 0.05em;
@@ -650,6 +848,13 @@
         border-radius: 14px;
       }
 
+      body.${LIGHT_THEME_CLASS} input,
+      body.${LIGHT_THEME_CLASS} textarea,
+      body.${LIGHT_THEME_CLASS} select {
+        background: rgba(255, 255, 255, 0.8);
+        border-color: rgba(28, 36, 40, 0.14);
+      }
+
       a:focus-visible,
       button:focus-visible,
       input:focus-visible,
@@ -675,12 +880,18 @@
         }
 
         .hn-editorial-topbar__inner {
+          display: flex;
           flex-direction: column;
           align-items: stretch;
+          gap: 10px;
         }
 
         .hn-editorial-nav {
           justify-content: flex-start;
+        }
+
+        .hn-editorial-actions {
+          justify-content: flex-end;
         }
 
         body.${LISTING_CLASS} .athing {
@@ -737,6 +948,16 @@
         .hn-editorial-nav a {
           padding: 8px 10px;
           font-size: 11px;
+        }
+
+        .hn-editorial-actions {
+          gap: 8px;
+        }
+
+        .hn-editorial-theme-toggle {
+          min-width: 64px;
+          height: 34px;
+          padding: 0 12px;
         }
 
         body.${LISTING_CLASS} .athing {
@@ -828,10 +1049,14 @@
         <nav class="hn-editorial-nav" aria-label="Hacker News sections">
           ${navMarkup}
         </nav>
+        <div class="hn-editorial-actions">
+          <button id="hn-editorial-theme-toggle" class="hn-editorial-theme-toggle" type="button">Light</button>
+        </div>
       </div>
     `;
 
     document.body.appendChild(topbar);
+    setupThemeToggle();
   }
 
   function enhanceListings() {
@@ -971,8 +1196,10 @@
     }
 
     document.body.classList.add(PAGE_CLASS);
+    initializeTheme();
     ensureStyle();
     ensureTopbar();
+    setupThemeToggle();
     enhanceListings();
     enhanceDiscussion();
   }
