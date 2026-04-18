@@ -16,6 +16,7 @@
   const FORGOT_CLASS = "hn-editorial-forgot";
   const FAVORITES_CLASS = "hn-editorial-favorites";
   const FAVORITES_COMMENT_CLASS = "hn-editorial-fav-comments";
+  const SHOWLIM_CLASS = "hn-editorial-showlim";
   const LIGHT_THEME_CLASS = "hn-theme-light";
   const THEME_STORAGE_KEY = "hn-editorial-theme";
 
@@ -44,7 +45,8 @@
     "/user": "Profile",
     "/submitted": "Submitted",
     "/threads": "Threads",
-    "/favorites": "Favorites"
+    "/favorites": "Favorites",
+    "/showlim": "Show HN"
   };
 
   function getPreferredTheme() {
@@ -1129,6 +1131,182 @@
         margin-top: 8px;
       }
 
+      /* ── Show HN limit page ── */
+      body.${SHOWLIM_CLASS} {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding-top: 70px;
+        box-sizing: border-box;
+      }
+
+      .hn-showlim-card {
+        background: var(--hn-panel);
+        border: 1px solid var(--hn-line);
+        border-radius: 28px;
+        padding: 52px 48px 44px;
+        box-shadow: var(--hn-shadow);
+        width: 100%;
+        max-width: 520px;
+        box-sizing: border-box;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .hn-showlim-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(ellipse 60% 40% at 50% -10%, rgba(255,102,0,0.09) 0%, transparent 70%);
+        pointer-events: none;
+      }
+
+      .hn-showlim-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        background: var(--hn-accent-soft);
+        border: 1px solid rgba(255,102,0,0.25);
+        border-radius: 999px;
+        padding: 5px 14px 5px 10px;
+        margin-bottom: 24px;
+      }
+
+      .hn-showlim-badge-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--hn-accent);
+        flex-shrink: 0;
+        animation: hn-showlim-pulse 2.4s ease-in-out infinite;
+      }
+
+      @keyframes hn-showlim-pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.4; transform: scale(0.75); }
+      }
+
+      .hn-showlim-badge-label {
+        font: 600 11px/1 var(--hn-sans);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--hn-accent);
+      }
+
+      .hn-showlim-title {
+        font: 700 28px/1.2 var(--hn-serif);
+        color: var(--hn-text);
+        margin: 0 0 16px;
+        letter-spacing: -0.01em;
+      }
+
+      .hn-showlim-body {
+        font: 400 16px/1.65 var(--hn-sans);
+        color: var(--hn-muted);
+        margin: 0 0 36px;
+      }
+
+      .hn-showlim-divider {
+        height: 1px;
+        background: var(--hn-line);
+        margin: 0 0 28px;
+      }
+
+      .hn-showlim-links-label {
+        font: 600 11px/1 var(--hn-sans);
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+        color: var(--hn-muted);
+        margin: 0 0 16px;
+      }
+
+      .hn-showlim-links {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .hn-showlim-link {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 18px;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid var(--hn-line);
+        border-radius: 14px;
+        text-decoration: none;
+        transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+      }
+
+      body.${LIGHT_THEME_CLASS} .hn-showlim-link {
+        background: rgba(0,0,0,0.025);
+      }
+
+      .hn-showlim-link:hover {
+        border-color: rgba(255,102,0,0.35);
+        background: rgba(255,102,0,0.06);
+        transform: translateX(3px);
+      }
+
+      .hn-showlim-link-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 9px;
+        background: var(--hn-accent-soft);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 15px;
+      }
+
+      .hn-showlim-link-text {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .hn-showlim-link-name {
+        font: 600 14px/1.2 var(--hn-sans);
+        color: var(--hn-text);
+        margin-bottom: 2px;
+      }
+
+      .hn-showlim-link-url {
+        font: 400 11px/1 var(--hn-mono);
+        color: var(--hn-muted);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .hn-showlim-link-arrow {
+        color: var(--hn-muted);
+        font-size: 16px;
+        flex-shrink: 0;
+        transition: color 160ms ease, transform 160ms ease;
+      }
+
+      .hn-showlim-link:hover .hn-showlim-link-arrow {
+        color: var(--hn-accent);
+        transform: translateX(2px);
+      }
+
+      @media (max-width: 560px) {
+        .hn-showlim-card {
+          padding: 36px 24px 32px;
+          border-radius: 20px;
+        }
+        .hn-showlim-title { font-size: 22px; }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .hn-showlim-badge-dot { animation: none; }
+        .hn-showlim-link { transition: none; }
+        .hn-showlim-link:hover { transform: none; }
+      }
+
       #hn-editorial-search {
         max-width: 780px;
         margin: 0 auto 20px;
@@ -1829,6 +2007,81 @@
     body.appendChild(card);
   }
 
+  function enhanceShowlim() {
+    if (currentPath !== "/showlim") return;
+    document.body.classList.add(SHOWLIM_CLASS);
+
+    const body = document.body;
+    const bigbox = body.querySelector("#bigbox td");
+    if (!bigbox) return;
+
+    const paragraphs = bigbox.querySelectorAll("td");
+    const mainText = paragraphs[0] ? paragraphs[0].textContent.trim() : "";
+    const rawLinks = bigbox.querySelectorAll("a[href]");
+
+    const linkMeta = {
+      "newsguidelines": { name: "Community Guidelines", icon: "📋" },
+      "newswelcome":    { name: "Welcome to HN",        icon: "👋" },
+      "showhn":         { name: "About Show HN",        icon: "💡" }
+    };
+
+    const topbar = document.getElementById(TOPBAR_ID);
+    body.innerHTML = "";
+    if (topbar) body.appendChild(topbar);
+
+    const card = document.createElement("div");
+    card.className = "hn-showlim-card";
+
+    const badge = document.createElement("div");
+    badge.className = "hn-showlim-badge";
+    badge.innerHTML = `<span class="hn-showlim-badge-dot"></span><span class="hn-showlim-badge-label">Temporarily Restricted</span>`;
+    card.appendChild(badge);
+
+    const title = document.createElement("h1");
+    title.className = "hn-showlim-title";
+    title.textContent = "Show HN is paused for you";
+    card.appendChild(title);
+
+    const bodyText = document.createElement("p");
+    bodyText.className = "hn-showlim-body";
+    bodyText.textContent = mainText || "We're temporarily restricting Show HNs. Take some time to get to know the community, become a good contributor, and then it will be fine to post an occasional Show HN.";
+    card.appendChild(bodyText);
+
+    const divider = document.createElement("div");
+    divider.className = "hn-showlim-divider";
+    card.appendChild(divider);
+
+    const linksLabel = document.createElement("div");
+    linksLabel.className = "hn-showlim-links-label";
+    linksLabel.textContent = "Get started";
+    card.appendChild(linksLabel);
+
+    const linksList = document.createElement("div");
+    linksList.className = "hn-showlim-links";
+
+    rawLinks.forEach(a => {
+      const href = a.getAttribute("href");
+      const key = Object.keys(linkMeta).find(k => href.includes(k));
+      const meta = key ? linkMeta[key] : { name: href.split("/").pop(), icon: "→" };
+
+      const link = document.createElement("a");
+      link.className = "hn-showlim-link";
+      link.href = href;
+      link.innerHTML = `
+        <span class="hn-showlim-link-icon">${meta.icon}</span>
+        <span class="hn-showlim-link-text">
+          <div class="hn-showlim-link-name">${meta.name}</div>
+          <div class="hn-showlim-link-url">${href.replace("https://news.ycombinator.com/", "")}</div>
+        </span>
+        <span class="hn-showlim-link-arrow">›</span>
+      `;
+      linksList.appendChild(link);
+    });
+
+    card.appendChild(linksList);
+    body.appendChild(card);
+  }
+
   function enhanceSubmitPage() {
     if (currentPath !== "/submit") return;
     document.body.classList.add(SUBMIT_CLASS);
@@ -2059,6 +2312,7 @@
     enhanceDiscussion();
     enhanceSubmitPage();
     enhanceForgotPage();
+    enhanceShowlim();
   }
 
   if (document.readyState === "loading") {
