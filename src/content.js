@@ -864,6 +864,45 @@
         outline-offset: 2px;
       }
 
+      #hn-editorial-search {
+        max-width: 780px;
+        margin: 0 auto 20px;
+        padding: 0 4px;
+      }
+
+      #hn-editorial-search-input {
+        width: 100%;
+        min-height: 48px;
+        padding: 0 20px;
+        border-radius: 999px;
+        border: 1px solid var(--hn-line);
+        background: var(--hn-panel);
+        color: var(--hn-text);
+        font: 400 16px/1 var(--hn-sans);
+        box-sizing: border-box;
+        box-shadow: var(--hn-shadow);
+        transition: border-color 160ms ease, box-shadow 160ms ease;
+      }
+
+      body.${LIGHT_THEME_CLASS} #hn-editorial-search-input {
+        background: rgba(255, 255, 255, 0.8);
+        border-color: rgba(28, 36, 40, 0.14);
+      }
+
+      #hn-editorial-search-input:focus {
+        outline: none;
+        border-color: rgba(245, 158, 11, 0.5);
+        box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.12), var(--hn-shadow);
+      }
+
+      #hn-editorial-search-input::placeholder {
+        color: var(--hn-muted);
+      }
+
+      tr.athing.hn-search-hidden {
+        display: none !important;
+      }
+
       @media (prefers-reduced-motion: reduce) {
         *,
         *::before,
@@ -1179,6 +1218,40 @@
     });
   }
 
+  function ensureSearch() {
+    if (!document.body.classList.contains(LISTING_CLASS)) {
+      return;
+    }
+
+    if (document.getElementById("hn-editorial-search")) {
+      return;
+    }
+
+    const listingTable =
+      document.querySelector("tr#bigbox > td > table") ||
+      document.querySelector("table.itemlist");
+
+    if (!listingTable) {
+      return;
+    }
+
+    const wrapper = document.createElement("div");
+    wrapper.id = "hn-editorial-search";
+    wrapper.innerHTML = `<input type="search" id="hn-editorial-search-input" placeholder="Filter stories…" autocomplete="off" aria-label="Filter stories" />`;
+    listingTable.parentNode.insertBefore(wrapper, listingTable);
+
+    const input = wrapper.querySelector("input");
+
+    input.addEventListener("input", () => {
+      const query = input.value.trim().toLowerCase();
+
+      document.querySelectorAll("tr.athing").forEach((item) => {
+        const title = item.querySelector(".titleline > a")?.textContent?.toLowerCase() || "";
+        item.classList.toggle("hn-search-hidden", Boolean(query) && !title.includes(query));
+      });
+    });
+  }
+
   function enhanceDiscussion() {
     const fatItem = document.querySelector(".fatitem");
     const commentTree = document.querySelector(".comment-tree");
@@ -1201,6 +1274,7 @@
     ensureTopbar();
     setupThemeToggle();
     enhanceListings();
+    ensureSearch();
     enhanceDiscussion();
   }
 
