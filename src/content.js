@@ -351,10 +351,13 @@
       }
 
       body.${LISTING_CLASS} .athing {
-        display: block !important;
+        display: flex !important;
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 12px;
         max-width: 780px;
         margin: 0 auto !important;
-        padding: 14px 18px !important;
+        padding: 10px 16px !important;
         border: 1px solid var(--hn-line);
         border-radius: 22px;
         background:
@@ -373,15 +376,21 @@
       }
 
       body.${LISTING_CLASS} .athing > td {
-        display: grid !important;
-        grid-template-columns: 32px 1fr;
-        grid-template-rows: auto auto;
-        column-gap: 12px;
-        row-gap: 6px;
+        display: block !important;
         padding: 0 !important;
-        width: 100%;
         box-sizing: border-box;
-        align-items: center;
+      }
+
+      body.${LISTING_CLASS} .athing > td.title:first-child {
+        flex: 0 0 auto;
+        display: flex !important;
+        align-items: flex-start;
+        padding-top: 2px !important;
+      }
+
+      body.${LISTING_CLASS} .athing > td.title:last-child {
+        flex: 1 1 0;
+        min-width: 0;
       }
 
       body.${LISTING_CLASS} .votelinks {
@@ -389,7 +398,6 @@
       }
 
       body.${LISTING_CLASS} span.rank {
-        grid-row: 1 / span 2;
         display: inline-flex !important;
         align-items: center;
         justify-content: center;
@@ -404,7 +412,6 @@
       }
 
       body.${LISTING_CLASS} .titleline {
-        grid-column: 2;
         display: block;
         margin-top: 0;
       }
@@ -412,7 +419,7 @@
       body.${LISTING_CLASS} .titleline > a {
         color: var(--hn-text);
         text-decoration: none;
-        font: 600 20px/1.3 var(--hn-serif);
+        font: 600 18px/1.3 var(--hn-serif);
         letter-spacing: -0.01em;
       }
 
@@ -440,14 +447,13 @@
       }
 
       body.${LISTING_CLASS} .hn-editorial-meta {
-        grid-column: 2;
         display: flex;
         flex-wrap: nowrap;
         align-items: center;
         justify-content: space-between;
         gap: 16px;
-        margin-top: 10px;
-        padding-top: 8px;
+        margin-top: 6px;
+        padding-top: 5px;
         border-top: 1px solid var(--hn-line);
         overflow: hidden;
         color: var(--hn-muted);
@@ -934,13 +940,8 @@
         }
 
         body.${LISTING_CLASS} .athing {
-          padding: 14px 16px !important;
+          padding: 10px 16px !important;
           border-radius: 22px;
-        }
-
-        body.${LISTING_CLASS} .athing > td {
-          grid-template-columns: 46px 1fr;
-          column-gap: 12px;
         }
 
         body.${LISTING_CLASS} span.rank {
@@ -1000,11 +1001,7 @@
         }
 
         body.${LISTING_CLASS} .athing {
-          padding: 14px 14px 12px !important;
-        }
-
-        body.${LISTING_CLASS} .athing > td {
-          grid-template-columns: 1fr;
+          padding: 10px 14px !important;
         }
 
         body.${LISTING_CLASS} .titleline > a {
@@ -1012,14 +1009,12 @@
         }
 
         body.${LISTING_CLASS} span.rank {
-          grid-row: auto;
           width: fit-content;
           min-height: 30px;
           margin-bottom: 2px;
         }
 
         body.${LISTING_CLASS} .hn-editorial-meta {
-          grid-column: auto;
           flex-wrap: wrap;
           align-items: flex-start;
           justify-content: flex-start;
