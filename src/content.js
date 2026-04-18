@@ -13,18 +13,19 @@
   const LISTING_CLASS = "hn-editorial-listing";
   const DISCUSSION_CLASS = "hn-editorial-discussion";
   const SUBMIT_CLASS = "hn-editorial-submit";
+  const FORGOT_CLASS = "hn-editorial-forgot";
   const LIGHT_THEME_CLASS = "hn-theme-light";
   const THEME_STORAGE_KEY = "hn-editorial-theme";
 
   const currentPath = window.location.pathname.replace(/\/+$/, "") || "/news";
 
   const sections = [
-    { href: "/news", label: "Top" },
     { href: "/newest", label: "New" },
-    { href: "/show", label: "Show" },
+    { href: "/front", label: "Past" },
+    { href: "/newcomments", label: "Comments" },
     { href: "/ask", label: "Ask" },
+    { href: "/show", label: "Show" },
     { href: "/jobs", label: "Jobs" },
-    { href: "/best", label: "Best" },
     { href: "/submit", label: "Submit" }
   ];
 
@@ -882,8 +883,11 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        padding-top: 80px;
-        min-height: 100vh;
+        height: 100vh;
+        overflow: hidden;
+        padding-top: 70px;
+        box-sizing: border-box;
+        margin: 0;
       }
 
       .hn-auth-card {
@@ -947,10 +951,37 @@
       .hn-submit-field input[type="password"] {
         width: 100% !important;
         min-height: 46px;
-        padding: 0 16px;
+        padding: 0 46px 0 16px;
         border-radius: 14px;
         font-size: 15px;
         box-sizing: border-box;
+      }
+
+      .hn-pw-wrap {
+        position: relative;
+      }
+
+      .hn-pw-wrap input {
+        width: 100% !important;
+      }
+
+      .hn-pw-toggle {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 4px;
+        color: var(--hn-muted);
+        font-size: 13px;
+        line-height: 1;
+        user-select: none;
+      }
+
+      .hn-pw-toggle:hover {
+        color: var(--hn-text);
       }
 
       .hn-auth-panel input[type="submit"] {
@@ -967,6 +998,41 @@
 
       .hn-auth-footer a {
         color: var(--hn-accent);
+      }
+
+      /* ── Forgot password page ── */
+      body.${FORGOT_CLASS} {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        overflow: hidden;
+        padding-top: 70px;
+        box-sizing: border-box;
+        margin: 0;
+      }
+
+      .hn-forgot-card {
+        background: var(--hn-panel);
+        border: 1px solid var(--hn-line);
+        border-radius: 24px;
+        padding: 36px;
+        box-shadow: var(--hn-shadow);
+        width: 100%;
+        max-width: 420px;
+        box-sizing: border-box;
+      }
+
+      .hn-forgot-card h2 {
+        font: 700 20px/1.2 var(--hn-sans);
+        color: var(--hn-text);
+        margin: 0 0 24px 0;
+      }
+
+      .hn-forgot-card input[type="submit"] {
+        width: 100%;
+        margin-top: 8px;
       }
 
       #hn-editorial-search {
@@ -1357,13 +1423,61 @@
     document.body.classList.add(DISCUSSION_CLASS);
   }
 
+  function enhanceForgotPage() {
+    if (currentPath !== "/forgot") return;
+    document.body.classList.add(FORGOT_CLASS);
+
+    const body = document.body;
+    const form = body.querySelector("form");
+    const title = body.querySelector("b");
+    const topbar = document.getElementById(TOPBAR_ID);
+    body.innerHTML = "";
+    if (topbar) body.appendChild(topbar);
+
+    const card = document.createElement("div");
+    card.className = "hn-forgot-card";
+
+    const h2 = document.createElement("h2");
+    h2.textContent = title ? title.textContent : "Reset your password";
+    card.appendChild(h2);
+
+    if (form) {
+      const newForm = document.createElement("form");
+      newForm.action = form.action;
+      newForm.method = form.method;
+
+      form.querySelectorAll("input[type=hidden]").forEach(h => newForm.appendChild(h.cloneNode(true)));
+
+      const fieldDiv = document.createElement("div");
+      fieldDiv.className = "hn-submit-field";
+      const lbl = document.createElement("label");
+      lbl.textContent = "Username";
+      lbl.setAttribute("for", "forgot_username");
+      const inp = form.querySelector("input[type=text]").cloneNode(true);
+      inp.id = "forgot_username";
+      fieldDiv.appendChild(lbl);
+      fieldDiv.appendChild(inp);
+      newForm.appendChild(fieldDiv);
+
+      const btn = form.querySelector("input[type=submit]").cloneNode(true);
+      newForm.appendChild(btn);
+      card.appendChild(newForm);
+    }
+
+    body.appendChild(card);
+  }
+
   function enhanceSubmitPage() {
     if (currentPath !== "/submit") return;
     document.body.classList.add(SUBMIT_CLASS);
 
     const body = document.body;
-    const forms = Array.from(body.querySelectorAll("form"));
-    const forgotLink = body.querySelector("a[href='forgot']");
+    // Clone forms before clearing body — detached elements lose queryable state in some browsers
+    const forms = Array.from(body.querySelectorAll("form")).map(f => f.cloneNode(true));
+    const forgotLink = body.querySelector("a[href='forgot']")?.cloneNode(true);
+    const errorText = Array.from(body.childNodes)
+      .filter(n => n.nodeType === Node.TEXT_NODE && n.textContent.trim())
+      .map(n => n.textContent.trim()).join(" ").trim();
 
     const topbar = document.getElementById(TOPBAR_ID);
     body.innerHTML = "";
@@ -1393,7 +1507,28 @@
           inp.id = uid;
           lbl.setAttribute("for", uid);
           fieldDiv.appendChild(lbl);
-          fieldDiv.appendChild(inp);
+          if (inp.type === "password") {
+            const wrap = document.createElement("div");
+            wrap.className = "hn-pw-wrap";
+            wrap.appendChild(inp);
+            const toggle = document.createElement("button");
+            toggle.type = "button";
+            toggle.className = "hn-pw-toggle";
+            const eyeOpen = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+            const eyeOff = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`;
+            toggle.innerHTML = eyeOpen;
+            toggle.setAttribute("aria-label", "Show password");
+            toggle.addEventListener("click", () => {
+              const isHidden = inp.type === "password";
+              inp.type = isHidden ? "text" : "password";
+              toggle.innerHTML = isHidden ? eyeOff : eyeOpen;
+              toggle.setAttribute("aria-label", isHidden ? "Hide password" : "Show password");
+            });
+            wrap.appendChild(toggle);
+            fieldDiv.appendChild(wrap);
+          } else {
+            fieldDiv.appendChild(inp);
+          }
           newForm.appendChild(fieldDiv);
         }
       });
@@ -1404,19 +1539,37 @@
       return panel;
     }
 
+    // Detect which form is signin vs signup by presence of hidden input name="creating"
+    const signinForm = forms.find(f => !f.querySelector("input[name='creating']"));
+    const signupForm = forms.find(f => f.querySelector("input[name='creating']"));
+
+    const isErrorPage = errorText.length > 0 && !errorText.includes("logged in");
+
+    // Which tab should be active initially
+    const defaultTab = signupForm && !signinForm ? "signup" : "signin";
+
     const card = document.createElement("div");
     card.className = "hn-auth-card";
+
+    // Error banner
+    if (isErrorPage) {
+      const banner = document.createElement("div");
+      banner.style.cssText = "padding:12px 20px;background:rgba(239,68,68,0.1);border-bottom:1px solid rgba(239,68,68,0.25);color:#dc2626;font:500 13px/1.4 var(--hn-sans);border-radius:24px 24px 0 0;text-align:center;";
+      banner.textContent = errorText;
+      card.appendChild(banner);
+    }
 
     // Tabs
     const tabs = document.createElement("div");
     tabs.className = "hn-auth-tabs";
     ["Sign In", "Sign Up"].forEach((label, i) => {
+      const tabId = i === 0 ? "signin" : "signup";
       const btn = document.createElement("button");
       btn.className = "hn-auth-tab";
       btn.textContent = label;
       btn.type = "button";
-      btn.dataset.tab = i === 0 ? "signin" : "signup";
-      btn.dataset.active = i === 0 ? "true" : "false";
+      btn.dataset.tab = tabId;
+      btn.dataset.active = tabId === defaultTab ? "true" : "false";
       btn.addEventListener("click", () => {
         tabs.querySelectorAll(".hn-auth-tab").forEach(t => t.dataset.active = "false");
         card.querySelectorAll(".hn-auth-panel").forEach(p => p.dataset.active = "false");
@@ -1427,8 +1580,18 @@
     });
     card.appendChild(tabs);
 
-    if (forms[0]) card.appendChild(buildPanel(forms[0], "signin"));
-    if (forms[1]) card.appendChild(buildPanel(forms[1], "signup"));
+    // Always build both panels; use a placeholder if a form is missing
+    const signinPanel = signinForm
+      ? buildPanel(signinForm, "signin")
+      : (() => { const p = document.createElement("div"); p.className = "hn-auth-panel"; p.dataset.tab = "signin"; p.dataset.active = defaultTab === "signin" ? "true" : "false"; return p; })();
+    signinPanel.dataset.active = defaultTab === "signin" ? "true" : "false";
+    card.appendChild(signinPanel);
+
+    const signupPanel = signupForm
+      ? buildPanel(signupForm, "signup")
+      : (() => { const p = document.createElement("div"); p.className = "hn-auth-panel"; p.dataset.tab = "signup"; p.dataset.active = defaultTab === "signup" ? "true" : "false"; return p; })();
+    signupPanel.dataset.active = defaultTab === "signup" ? "true" : "false";
+    card.appendChild(signupPanel);
 
     if (forgotLink) {
       const footer = document.createElement("div");
@@ -1438,6 +1601,10 @@
     }
 
     body.appendChild(card);
+
+    // Force-activate correct tab after DOM insertion
+    const targetBtn = tabs.querySelector(`.hn-auth-tab[data-tab="${defaultTab}"]`);
+    if (targetBtn) targetBtn.click();
   }
 
   function boot() {
@@ -1454,6 +1621,7 @@
     ensureSearch();
     enhanceDiscussion();
     enhanceSubmitPage();
+    enhanceForgotPage();
   }
 
   if (document.readyState === "loading") {
