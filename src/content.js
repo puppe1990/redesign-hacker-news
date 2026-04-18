@@ -12,6 +12,7 @@
   const PAGE_CLASS = "hn-editorial-page";
   const LISTING_CLASS = "hn-editorial-listing";
   const DISCUSSION_CLASS = "hn-editorial-discussion";
+  const SUBMIT_CLASS = "hn-editorial-submit";
   const LIGHT_THEME_CLASS = "hn-theme-light";
   const THEME_STORAGE_KEY = "hn-editorial-theme";
 
@@ -23,7 +24,8 @@
     { href: "/show", label: "Show" },
     { href: "/ask", label: "Ask" },
     { href: "/jobs", label: "Jobs" },
-    { href: "/best", label: "Best" }
+    { href: "/best", label: "Best" },
+    { href: "/submit", label: "Submit" }
   ];
 
   const pageLabels = {
@@ -192,6 +194,10 @@
         display: block !important;
         width: 100% !important;
         padding: 0 !important;
+      }
+
+      tr#bigbox > td > div {
+        text-align: center;
       }
 
       #${TOPBAR_ID} {
@@ -870,6 +876,99 @@
         outline-offset: 2px;
       }
 
+      /* ── Submit / Login page ── */
+      body.${SUBMIT_CLASS} {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding-top: 80px;
+        min-height: 100vh;
+      }
+
+      .hn-auth-card {
+        background: var(--hn-panel);
+        border: 1px solid var(--hn-line);
+        border-radius: 24px;
+        box-shadow: var(--hn-shadow);
+        width: 100%;
+        max-width: 420px;
+        box-sizing: border-box;
+        overflow: hidden;
+      }
+
+      .hn-auth-tabs {
+        display: flex;
+        border-bottom: 1px solid var(--hn-line);
+      }
+
+      .hn-auth-tab {
+        flex: 1;
+        padding: 16px 0;
+        background: none;
+        border: none;
+        font: 600 13px/1 var(--hn-sans);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--hn-muted);
+        cursor: pointer;
+        transition: color 160ms ease, background 160ms ease;
+      }
+
+      .hn-auth-tab[data-active="true"] {
+        color: var(--hn-accent);
+        background: rgba(245, 158, 11, 0.06);
+      }
+
+      .hn-auth-panel {
+        padding: 32px 36px;
+        display: none;
+      }
+
+      .hn-auth-panel[data-active="true"] {
+        display: block;
+      }
+
+      .hn-submit-field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-bottom: 16px;
+      }
+
+      .hn-submit-field label {
+        font: 600 11px/1 var(--hn-sans);
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        color: var(--hn-muted);
+      }
+
+      .hn-submit-field input[type="text"],
+      .hn-submit-field input[type="password"] {
+        width: 100% !important;
+        min-height: 46px;
+        padding: 0 16px;
+        border-radius: 14px;
+        font-size: 15px;
+        box-sizing: border-box;
+      }
+
+      .hn-auth-panel input[type="submit"] {
+        width: 100%;
+        margin-top: 8px;
+      }
+
+      .hn-auth-footer {
+        padding: 0 36px 20px;
+        font: 400 13px/1.5 var(--hn-sans);
+        color: var(--hn-muted);
+        text-align: center;
+      }
+
+      .hn-auth-footer a {
+        color: var(--hn-accent);
+      }
+
       #hn-editorial-search {
         max-width: 780px;
         margin: 0 auto 20px;
@@ -1258,6 +1357,89 @@
     document.body.classList.add(DISCUSSION_CLASS);
   }
 
+  function enhanceSubmitPage() {
+    if (currentPath !== "/submit") return;
+    document.body.classList.add(SUBMIT_CLASS);
+
+    const body = document.body;
+    const forms = Array.from(body.querySelectorAll("form"));
+    const forgotLink = body.querySelector("a[href='forgot']");
+
+    const topbar = document.getElementById(TOPBAR_ID);
+    body.innerHTML = "";
+    if (topbar) body.appendChild(topbar);
+
+    function buildPanel(form, tabId) {
+      const panel = document.createElement("div");
+      panel.className = "hn-auth-panel";
+      panel.dataset.active = tabId === "signin" ? "true" : "false";
+      panel.dataset.tab = tabId;
+
+      const newForm = document.createElement("form");
+      newForm.action = form.action;
+      newForm.method = form.method;
+
+      form.querySelectorAll("input[type=hidden]").forEach(h => newForm.appendChild(h.cloneNode(true)));
+
+      Array.from(form.querySelectorAll("tr")).forEach(row => {
+        const tds = row.querySelectorAll("td");
+        if (tds.length === 2) {
+          const fieldDiv = document.createElement("div");
+          fieldDiv.className = "hn-submit-field";
+          const lbl = document.createElement("label");
+          lbl.textContent = tds[0].textContent.replace(":", "").trim();
+          const inp = tds[1].querySelector("input").cloneNode(true);
+          const uid = tabId + "_" + inp.name;
+          inp.id = uid;
+          lbl.setAttribute("for", uid);
+          fieldDiv.appendChild(lbl);
+          fieldDiv.appendChild(inp);
+          newForm.appendChild(fieldDiv);
+        }
+      });
+
+      const submitBtn = form.querySelector("input[type=submit]").cloneNode(true);
+      newForm.appendChild(submitBtn);
+      panel.appendChild(newForm);
+      return panel;
+    }
+
+    const card = document.createElement("div");
+    card.className = "hn-auth-card";
+
+    // Tabs
+    const tabs = document.createElement("div");
+    tabs.className = "hn-auth-tabs";
+    ["Sign In", "Sign Up"].forEach((label, i) => {
+      const btn = document.createElement("button");
+      btn.className = "hn-auth-tab";
+      btn.textContent = label;
+      btn.type = "button";
+      btn.dataset.tab = i === 0 ? "signin" : "signup";
+      btn.dataset.active = i === 0 ? "true" : "false";
+      btn.addEventListener("click", () => {
+        tabs.querySelectorAll(".hn-auth-tab").forEach(t => t.dataset.active = "false");
+        card.querySelectorAll(".hn-auth-panel").forEach(p => p.dataset.active = "false");
+        btn.dataset.active = "true";
+        card.querySelector(`.hn-auth-panel[data-tab="${btn.dataset.tab}"]`).dataset.active = "true";
+      });
+      tabs.appendChild(btn);
+    });
+    card.appendChild(tabs);
+
+    if (forms[0]) card.appendChild(buildPanel(forms[0], "signin"));
+    if (forms[1]) card.appendChild(buildPanel(forms[1], "signup"));
+
+    if (forgotLink) {
+      const footer = document.createElement("div");
+      footer.className = "hn-auth-footer";
+      footer.appendChild(forgotLink.cloneNode(true));
+      card.appendChild(footer);
+    }
+
+    body.appendChild(card);
+  }
+
   function boot() {
     if (!document.body || !document.head) {
       return;
@@ -1271,6 +1453,7 @@
     enhanceListings();
     ensureSearch();
     enhanceDiscussion();
+    enhanceSubmitPage();
   }
 
   if (document.readyState === "loading") {
