@@ -17,6 +17,7 @@
   const FAVORITES_CLASS = "hn-editorial-favorites";
   const FAVORITES_COMMENT_CLASS = "hn-editorial-fav-comments";
   const SHOWLIM_CLASS = "hn-editorial-showlim";
+  const USER_CLASS = "hn-editorial-user";
   const LIGHT_THEME_CLASS = "hn-theme-light";
   const THEME_STORAGE_KEY = "hn-editorial-theme";
 
@@ -1307,6 +1308,162 @@
         .hn-showlim-link:hover { transform: none; }
       }
 
+      /* ── User profile page ── */
+      body.${USER_CLASS} {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding-top: 80px;
+        padding-bottom: 40px;
+        box-sizing: border-box;
+      }
+
+      .hn-user-card {
+        background: var(--hn-panel);
+        border: 1px solid var(--hn-line);
+        border-radius: 28px;
+        box-shadow: var(--hn-shadow);
+        width: 100%;
+        max-width: 480px;
+        box-sizing: border-box;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .hn-user-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(ellipse 70% 40% at 50% -5%, rgba(255, 102, 0, 0.08) 0%, transparent 70%);
+        pointer-events: none;
+      }
+
+      .hn-user-card__header {
+        padding: 36px 36px 28px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        border-bottom: 1px solid var(--hn-line);
+      }
+
+      .hn-user-avatar {
+        width: 64px;
+        height: 64px;
+        border-radius: 20px;
+        display: grid;
+        place-items: center;
+        font: 700 28px/1 var(--hn-sans);
+        color: #ffffff;
+        background: linear-gradient(135deg, #ff8533, #ff6600 55%, #cc5200);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.26), 0 8px 24px rgba(255, 102, 0, 0.28);
+        flex-shrink: 0;
+      }
+
+      .hn-user-meta {
+        min-width: 0;
+      }
+
+      .hn-user-name {
+        font: 600 26px/1.1 var(--hn-serif);
+        color: var(--hn-text);
+        letter-spacing: -0.01em;
+        margin-bottom: 5px;
+        word-break: break-word;
+      }
+
+      .hn-user-handle {
+        font: 600 11px/1 var(--hn-sans);
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        color: var(--hn-muted);
+      }
+
+      .hn-user-stats {
+        display: flex;
+        border-bottom: 1px solid var(--hn-line);
+      }
+
+      .hn-user-stat {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+        padding: 20px 16px;
+        border-right: 1px solid var(--hn-line);
+      }
+
+      .hn-user-stat:last-child {
+        border-right: none;
+      }
+
+      .hn-user-stat__value {
+        font: 700 22px/1 var(--hn-sans);
+        color: var(--hn-text);
+      }
+
+      .hn-user-stat__label {
+        font: 600 10px/1 var(--hn-sans);
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        color: var(--hn-muted);
+      }
+
+      .hn-user-about {
+        padding: 22px 32px;
+        border-bottom: 1px solid var(--hn-line);
+        color: var(--hn-text);
+        font: 400 16px/1.7 var(--hn-serif);
+      }
+
+      .hn-user-about a {
+        color: #ff9955;
+        text-decoration: none;
+      }
+
+      .hn-user-about a:hover {
+        text-decoration: underline;
+      }
+
+      .hn-user-links {
+        display: flex;
+        gap: 8px;
+        padding: 20px 28px;
+        flex-wrap: wrap;
+      }
+
+      .hn-user-link {
+        flex: 1;
+        text-align: center;
+        padding: 10px 16px;
+        border-radius: 999px;
+        border: 1px solid var(--hn-line);
+        background: rgba(255, 255, 255, 0.03);
+        color: var(--hn-muted);
+        font: 600 11px/1 var(--hn-sans);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        text-decoration: none;
+        transition: color 160ms ease, background 160ms ease, border-color 160ms ease, transform 160ms ease;
+      }
+
+      .hn-user-link:hover {
+        color: var(--hn-text);
+        background: rgba(255, 255, 255, 0.06);
+        border-color: var(--hn-line-strong);
+        transform: translateY(-1px);
+      }
+
+      body.${LIGHT_THEME_CLASS} .hn-user-link {
+        background: rgba(0, 0, 0, 0.03);
+      }
+
+      body.${LIGHT_THEME_CLASS} .hn-user-link:hover {
+        background: rgba(0, 0, 0, 0.06);
+      }
+
       #hn-editorial-search {
         max-width: 780px;
         margin: 0 auto 20px;
@@ -2082,6 +2239,110 @@
     body.appendChild(card);
   }
 
+  function enhanceUserPage() {
+    if (currentPath !== "/user") return;
+    document.body.classList.add(USER_CLASS);
+
+    const body = document.body;
+    const bigbox = body.querySelector("#bigbox td");
+    if (!bigbox) return;
+
+    let username = "", created = "", karma = "", aboutHTML = "";
+    const links = [];
+
+    bigbox.querySelectorAll("tr").forEach(row => {
+      const tds = row.querySelectorAll("td");
+      if (tds.length < 2) return;
+      const label = tds[0].textContent.trim().replace(":", "").toLowerCase();
+      const val = tds[1];
+
+      if (label === "user") {
+        username = val.querySelector("a.hnuser")?.textContent.trim() || val.textContent.trim();
+      } else if (label === "created") {
+        created = val.querySelector(".age a")?.textContent.trim() || val.textContent.trim();
+      } else if (label === "karma") {
+        karma = val.textContent.trim();
+      } else if (label === "about") {
+        aboutHTML = val.innerHTML.trim();
+      } else if (label === "") {
+        const a = val.querySelector("a");
+        if (a) links.push({ href: a.getAttribute("href"), text: a.textContent.trim() });
+      }
+    });
+
+    const topbar = document.getElementById(TOPBAR_ID);
+    body.innerHTML = "";
+    if (topbar) body.appendChild(topbar);
+
+    const card = document.createElement("div");
+    card.className = "hn-user-card";
+
+    const header = document.createElement("div");
+    header.className = "hn-user-card__header";
+
+    const avatar = document.createElement("div");
+    avatar.className = "hn-user-avatar";
+    avatar.textContent = (username.charAt(0) || "?").toUpperCase();
+
+    const meta = document.createElement("div");
+    meta.className = "hn-user-meta";
+
+    const nameEl = document.createElement("div");
+    nameEl.className = "hn-user-name";
+    nameEl.textContent = username;
+
+    const handleEl = document.createElement("div");
+    handleEl.className = "hn-user-handle";
+    handleEl.textContent = "Hacker News Member";
+
+    meta.appendChild(nameEl);
+    meta.appendChild(handleEl);
+    header.appendChild(avatar);
+    header.appendChild(meta);
+    card.appendChild(header);
+
+    const stats = document.createElement("div");
+    stats.className = "hn-user-stats";
+
+    if (karma) {
+      const s = document.createElement("div");
+      s.className = "hn-user-stat";
+      s.innerHTML = `<span class="hn-user-stat__value">${karma}</span><span class="hn-user-stat__label">Karma</span>`;
+      stats.appendChild(s);
+    }
+
+    if (created) {
+      const s = document.createElement("div");
+      s.className = "hn-user-stat";
+      s.innerHTML = `<span class="hn-user-stat__value">${created}</span><span class="hn-user-stat__label">Member since</span>`;
+      stats.appendChild(s);
+    }
+
+    if (stats.childNodes.length) card.appendChild(stats);
+
+    if (aboutHTML) {
+      const aboutDiv = document.createElement("div");
+      aboutDiv.className = "hn-user-about";
+      aboutDiv.innerHTML = aboutHTML;
+      card.appendChild(aboutDiv);
+    }
+
+    if (links.length) {
+      const linksDiv = document.createElement("div");
+      linksDiv.className = "hn-user-links";
+      links.forEach(({ href, text }) => {
+        const a = document.createElement("a");
+        a.className = "hn-user-link";
+        a.href = href;
+        a.textContent = text;
+        linksDiv.appendChild(a);
+      });
+      card.appendChild(linksDiv);
+    }
+
+    body.appendChild(card);
+  }
+
   function enhanceSubmitPage() {
     if (currentPath !== "/submit") return;
     document.body.classList.add(SUBMIT_CLASS);
@@ -2310,6 +2571,7 @@
     enhanceListings();
     ensureSearch();
     enhanceDiscussion();
+    enhanceUserPage();
     enhanceSubmitPage();
     enhanceForgotPage();
     enhanceShowlim();
