@@ -14,10 +14,14 @@
   const DISCUSSION_CLASS = "hn-editorial-discussion";
   const SUBMIT_CLASS = "hn-editorial-submit";
   const FORGOT_CLASS = "hn-editorial-forgot";
+  const FAVORITES_CLASS = "hn-editorial-favorites";
+  const FAVORITES_COMMENT_CLASS = "hn-editorial-fav-comments";
   const LIGHT_THEME_CLASS = "hn-theme-light";
   const THEME_STORAGE_KEY = "hn-editorial-theme";
 
   const currentPath = window.location.pathname.replace(/\/+$/, "") || "/news";
+  const isFavoritesComments = currentPath === "/favorites" &&
+    new URLSearchParams(window.location.search).get("comments") === "t";
 
   const sections = [
     { href: "/newest", label: "New" },
@@ -883,11 +887,101 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        height: 100vh;
-        overflow: hidden;
+        min-height: 100vh;
         padding-top: 70px;
+        padding-bottom: 40px;
         box-sizing: border-box;
         margin: 0;
+      }
+
+      /* ── Submit story card (logged-in submit form) ── */
+      .hn-story-card {
+        background: var(--hn-panel);
+        border: 1px solid var(--hn-line);
+        border-radius: 24px;
+        box-shadow: var(--hn-shadow);
+        width: 100%;
+        max-width: 520px;
+        box-sizing: border-box;
+        overflow: hidden;
+      }
+
+      .hn-story-card__header {
+        padding: 24px 28px 20px;
+        border-bottom: 1px solid var(--hn-line);
+      }
+
+      .hn-story-card__title {
+        font: 700 18px/1.2 var(--hn-serif);
+        color: var(--hn-text);
+        margin: 0 0 4px;
+      }
+
+      .hn-story-card__subtitle {
+        font: 400 13px/1.5 var(--hn-sans);
+        color: var(--hn-muted);
+        margin: 0;
+      }
+
+      .hn-story-card__body {
+        padding: 24px 28px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .hn-story-field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .hn-story-field label {
+        font: 600 11px/1 var(--hn-sans);
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        color: var(--hn-muted);
+      }
+
+      .hn-story-field input[type="text"],
+      .hn-story-field input[type="url"] {
+        width: 100% !important;
+        min-height: 46px;
+        padding: 0 16px;
+        border-radius: 14px;
+        font-size: 15px;
+        box-sizing: border-box;
+      }
+
+      .hn-story-field textarea {
+        width: 100% !important;
+        min-height: 120px;
+        padding: 12px 16px;
+        border-radius: 14px;
+        font-size: 15px;
+        box-sizing: border-box;
+        resize: vertical;
+        font-family: var(--hn-sans);
+      }
+
+      .hn-story-card__hint {
+        padding: 0 28px 20px;
+        font: 400 13px/1.6 var(--hn-sans);
+        color: var(--hn-muted);
+      }
+
+      .hn-story-card__hint a {
+        color: var(--hn-accent);
+        text-decoration: none;
+      }
+
+      .hn-story-card__footer {
+        padding: 16px 28px 24px;
+        border-top: 1px solid var(--hn-line);
+      }
+
+      .hn-story-card__footer input[type="submit"] {
+        width: 100%;
       }
 
       .hn-auth-card {
@@ -1074,6 +1168,240 @@
         display: none !important;
       }
 
+      /* ── Favorites page: tab nav ── */
+      body.${FAVORITES_CLASS} tr#bigbox > td > div:first-child {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        max-width: 780px;
+        margin: 0 auto 28px !important;
+        padding: 5px !important;
+        background: var(--hn-panel);
+        border: 1px solid var(--hn-line);
+        border-radius: 999px;
+        box-shadow: var(--hn-shadow);
+        text-align: left !important;
+      }
+
+      body.${FAVORITES_CLASS} tr#bigbox > td > div:first-child > a {
+        flex: 1;
+        text-align: center;
+        padding: 9px 20px;
+        border-radius: 999px;
+        font: 600 11px/1 var(--hn-sans);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        text-decoration: none;
+        color: var(--hn-muted);
+        transition: color 160ms ease, background 160ms ease;
+      }
+
+      body.${FAVORITES_CLASS} tr#bigbox > td > div:first-child > a:hover {
+        color: var(--hn-text);
+        background: rgba(255, 255, 255, 0.04);
+      }
+
+      body.${FAVORITES_CLASS} tr#bigbox > td > div:first-child > a[data-active="true"] {
+        color: #ffffff;
+        background: linear-gradient(135deg, #ff8533, #ff6600);
+      }
+
+      body.${FAVORITES_CLASS} tr#bigbox > td > div:first-child > span {
+        display: none !important;
+      }
+
+      /* ── Favorites comments: layout container ── */
+      body.${FAVORITES_COMMENT_CLASS} tr#bigbox > td > table {
+        display: block !important;
+        width: 100% !important;
+        max-width: 780px !important;
+        margin: 0 auto !important;
+        border-collapse: separate !important;
+        border-spacing: 0 16px !important;
+      }
+
+      body.${FAVORITES_COMMENT_CLASS} tr#bigbox > td > table > tbody {
+        display: block !important;
+        width: 100% !important;
+      }
+
+      /* ── Favorites comment card ── */
+      body.${FAVORITES_COMMENT_CLASS} .athing {
+        display: block !important;
+        max-width: 780px;
+        margin: 0 auto !important;
+        padding: 24px 28px !important;
+        border: 1px solid var(--hn-line);
+        border-radius: 22px;
+        background:
+          radial-gradient(circle at top left, rgba(255, 102, 0, 0.05), transparent 30%),
+          linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 50%),
+          var(--hn-panel);
+        box-shadow: var(--hn-shadow);
+        transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+      }
+
+      body.${FAVORITES_COMMENT_CLASS} .athing:hover {
+        transform: translateY(-3px);
+        border-color: var(--hn-line-strong);
+        box-shadow: 0 32px 90px rgba(0, 0, 0, 0.38);
+      }
+
+      body.${FAVORITES_COMMENT_CLASS} .athing > td {
+        display: block !important;
+        padding: 0 !important;
+      }
+
+      body.${FAVORITES_COMMENT_CLASS} .athing > td.ind,
+      body.${FAVORITES_COMMENT_CLASS} .athing > td.votelinks {
+        display: none !important;
+      }
+
+      body.${FAVORITES_COMMENT_CLASS} .spacer {
+        display: none !important;
+      }
+
+      /* story context label */
+      body.${FAVORITES_COMMENT_CLASS} .onstory {
+        display: block;
+        margin-bottom: 12px;
+        padding: 7px 12px;
+        border-radius: 10px;
+        background: var(--hn-accent-soft);
+        border: 1px solid rgba(255, 102, 0, 0.18);
+        font: 600 11px/1.4 var(--hn-sans);
+        letter-spacing: 0.04em;
+        color: #ff9955;
+      }
+
+      body.${FAVORITES_COMMENT_CLASS} .onstory::before {
+        content: "saved from  ·  ";
+        color: var(--hn-muted);
+        text-transform: uppercase;
+        font-size: 10px;
+        letter-spacing: 0.07em;
+      }
+
+      body.${FAVORITES_COMMENT_CLASS} .onstory > a {
+        color: #ff9955 !important;
+        text-decoration: none;
+      }
+
+      body.${FAVORITES_COMMENT_CLASS} .onstory > a:hover {
+        color: #ffb077 !important;
+      }
+
+      /* comhead: author + time + nav */
+      body.${FAVORITES_COMMENT_CLASS} .comhead {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px 10px;
+        margin-bottom: 14px;
+        font: 600 12px/1.5 var(--hn-sans);
+        color: var(--hn-muted);
+      }
+
+      body.${FAVORITES_COMMENT_CLASS} .comhead a.hnuser {
+        color: var(--hn-text) !important;
+        font-weight: 700;
+        font-size: 13px;
+        text-decoration: none;
+      }
+
+      body.${FAVORITES_COMMENT_CLASS} .comhead a.hnuser:hover {
+        color: #ff9955 !important;
+      }
+
+      body.${FAVORITES_COMMENT_CLASS} .comhead .age a,
+      body.${FAVORITES_COMMENT_CLASS} .comhead .navs a {
+        color: var(--hn-muted);
+        text-decoration: none;
+      }
+
+      body.${FAVORITES_COMMENT_CLASS} .comhead .age a:hover,
+      body.${FAVORITES_COMMENT_CLASS} .comhead .navs a:hover {
+        color: #ff9955;
+      }
+
+      body.${FAVORITES_COMMENT_CLASS} .comhead .navs {
+        display: flex;
+        gap: 8px;
+        color: var(--hn-muted);
+      }
+
+      body.${FAVORITES_COMMENT_CLASS} .comhead .onstory {
+        display: none; /* hidden here, shown above as context banner */
+      }
+
+      /* divider between comhead and comment text */
+      body.${FAVORITES_COMMENT_CLASS} .comment {
+        border-top: 1px solid var(--hn-line);
+        padding-top: 14px;
+      }
+
+      body.${FAVORITES_COMMENT_CLASS} .commtext {
+        color: var(--hn-text);
+        font: 400 18px/1.85 var(--hn-serif);
+      }
+
+      body.${FAVORITES_COMMENT_CLASS} .commtext p:first-child {
+        margin-top: 0;
+      }
+
+      body.${FAVORITES_COMMENT_CLASS} .commtext a {
+        color: #ff9955;
+        text-decoration: none;
+      }
+
+      body.${FAVORITES_COMMENT_CLASS} .commtext a:hover {
+        text-decoration: underline;
+      }
+
+      body.${FAVORITES_COMMENT_CLASS} .commtext pre {
+        overflow: auto;
+        padding: 14px;
+        border-radius: 12px;
+        background: rgba(0, 0, 0, 0.22);
+        font-size: 14px;
+      }
+
+      body.${FAVORITES_COMMENT_CLASS} .reply {
+        margin-top: 14px;
+        font: 700 11px/1 var(--hn-sans);
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: var(--hn-muted);
+      }
+
+      body.${FAVORITES_COMMENT_CLASS} .reply a {
+        color: var(--hn-muted);
+        text-decoration: none;
+      }
+
+      body.${FAVORITES_COMMENT_CLASS} .reply a:hover {
+        color: #ff9955;
+      }
+
+      /* light theme adjustments */
+      body.${LIGHT_THEME_CLASS}.${FAVORITES_COMMENT_CLASS} .athing {
+        background:
+          radial-gradient(circle at top left, rgba(255, 102, 0, 0.04), transparent 28%),
+          linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(255, 253, 248, 0.96)),
+          var(--hn-panel);
+        border-color: rgba(28, 36, 40, 0.1);
+        box-shadow: 0 14px 38px rgba(113, 91, 52, 0.08);
+      }
+
+      body.${LIGHT_THEME_CLASS}.${FAVORITES_COMMENT_CLASS} .commtext {
+        color: #1c2428;
+      }
+
+      body.${LIGHT_THEME_CLASS}.${FAVORITES_COMMENT_CLASS} .comhead a.hnuser {
+        color: #1c2428 !important;
+      }
+
       @media (prefers-reduced-motion: reduce) {
         *,
         *::before,
@@ -1258,10 +1586,44 @@
     setupThemeToggle();
   }
 
+  function enhanceFavorites() {
+    if (currentPath !== "/favorites") return;
+    document.body.classList.add(FAVORITES_CLASS);
+
+    // Style the tab nav (submissions | comments)
+    const tabDiv = document.querySelector("tr#bigbox > td > div");
+    if (tabDiv) {
+      // Mark active tab link
+      tabDiv.querySelectorAll("a").forEach(a => {
+        const href = a.getAttribute("href") || "";
+        const isComments = href.includes("comments=t");
+        a.dataset.active = String(isFavoritesComments ? isComments : !isComments);
+      });
+    }
+
+    if (!isFavoritesComments) return;
+    document.body.classList.add(FAVORITES_COMMENT_CLASS);
+
+    // Promote .onstory banner above .comhead in each comment card
+    document.querySelectorAll("tr.athing").forEach(row => {
+      const defaultTd = row.querySelector("td.default");
+      if (!defaultTd) return;
+      const onstory = defaultTd.querySelector(".onstory");
+      if (!onstory) return;
+      // Clone onstory as top-level banner inside the card
+      const banner = document.createElement("div");
+      banner.className = "onstory";
+      banner.innerHTML = onstory.innerHTML;
+      defaultTd.insertBefore(banner, defaultTd.firstChild);
+    });
+  }
+
   function enhanceListings() {
     if (document.querySelector(".fatitem") || document.querySelector(".comment-tree")) {
       return;
     }
+
+    if (isFavoritesComments) return;
 
     const items = Array.from(document.querySelectorAll("tr.athing"));
 
@@ -1472,6 +1834,80 @@
     document.body.classList.add(SUBMIT_CLASS);
 
     const body = document.body;
+
+    // Logged-in submit page: single form with fnop=submit-page
+    const storyForm = body.querySelector("form input[name='fnop'][value='submit-page']")?.closest("form");
+    if (storyForm) {
+      const clonedForm = storyForm.cloneNode(true);
+      const topbar = document.getElementById(TOPBAR_ID);
+      body.innerHTML = "";
+      if (topbar) body.appendChild(topbar);
+
+      const card = document.createElement("div");
+      card.className = "hn-story-card";
+
+      const header = document.createElement("div");
+      header.className = "hn-story-card__header";
+      header.innerHTML = `<h2 class="hn-story-card__title">Submit a Story</h2><p class="hn-story-card__subtitle">Share something worth reading with Hacker News</p>`;
+      card.appendChild(header);
+
+      const newForm = document.createElement("form");
+      newForm.action = clonedForm.action;
+      newForm.method = clonedForm.method;
+      clonedForm.querySelectorAll("input[type=hidden]").forEach(h => newForm.appendChild(h.cloneNode(true)));
+
+      const bodyDiv = document.createElement("div");
+      bodyDiv.className = "hn-story-card__body";
+
+      const fieldDefs = [
+        { name: "title", label: "Title", type: "text" },
+        { name: "url", label: "URL", type: "url" },
+        { name: "text", label: "Text", type: "textarea" }
+      ];
+
+      fieldDefs.forEach(({ name, label, type }) => {
+        const src = clonedForm.querySelector(`[name="${name}"]`);
+        if (!src) return;
+        const field = document.createElement("div");
+        field.className = "hn-story-field";
+        const lbl = document.createElement("label");
+        lbl.textContent = label;
+        lbl.setAttribute("for", `story_${name}`);
+        const inp = src.cloneNode(true);
+        inp.id = `story_${name}`;
+        field.appendChild(lbl);
+        field.appendChild(inp);
+        bodyDiv.appendChild(field);
+      });
+
+      newForm.appendChild(bodyDiv);
+
+      // Hint text: td with substantial text but no input/textarea/select
+      const hintTd = Array.from(clonedForm.querySelectorAll("td")).find(td =>
+        td.textContent.trim().length > 30 &&
+        !td.querySelector("input") &&
+        !td.querySelector("textarea") &&
+        !td.querySelector("select")
+      );
+      if (hintTd) {
+        const hint = document.createElement("div");
+        hint.className = "hn-story-card__hint";
+        hint.innerHTML = hintTd.innerHTML;
+        newForm.appendChild(hint);
+      }
+
+      const footer = document.createElement("div");
+      footer.className = "hn-story-card__footer";
+      const submitBtn = clonedForm.querySelector("input[type=submit]").cloneNode(true);
+      footer.appendChild(submitBtn);
+      newForm.appendChild(footer);
+
+      card.appendChild(newForm);
+      body.appendChild(card);
+      return;
+    }
+
+    // Not logged in: auth (login/signup) forms
     // Clone forms before clearing body — detached elements lose queryable state in some browsers
     const forms = Array.from(body.querySelectorAll("form")).map(f => f.cloneNode(true));
     const forgotLink = body.querySelector("a[href='forgot']")?.cloneNode(true);
@@ -1617,6 +2053,7 @@
     ensureStyle();
     ensureTopbar();
     setupThemeToggle();
+    enhanceFavorites();
     enhanceListings();
     ensureSearch();
     enhanceDiscussion();

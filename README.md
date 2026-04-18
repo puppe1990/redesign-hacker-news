@@ -9,7 +9,9 @@ A Manifest V3 Chrome extension that injects a visual redesign into the Hacker Ne
 - replaces the original header with a fixed top bar
 - turns the post list into more readable editorial-style cards
 - improves contrast, spacing, and typographic hierarchy
-- applies the style to discussion and comment pages as well
+- applies the style to discussion, comment, favorites, and submit pages
+- light/dark theme toggle with system preference detection
+- client-side story filter search
 
 ## Structure
 
