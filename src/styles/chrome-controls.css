@@ -1,0 +1,105 @@
+/* Footer links, More, submit buttons, form controls, focus rings. */
+.yclinks,
+.yclinks * {
+  color: var(--hn-muted) !important;
+}
+
+.yclinks a,
+.pagetop a,
+.hnmore a {
+  color: var(--hn-muted) !important;
+  text-decoration: none !important;
+}
+
+.yclinks a:hover,
+.pagetop a:hover,
+.hnmore a:hover {
+  color: #ffd386 !important;
+}
+
+center > table:last-of-type {
+  width: min(var(--hn-content-width), 100%) !important;
+  margin: 28px auto 0 !important;
+  border-collapse: separate !important;
+}
+
+center > table:last-of-type tr td {
+  color: var(--hn-muted) !important;
+}
+
+.yclinks {
+  display: flex !important;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin: 0 auto 18px;
+  padding: 18px 20px 0;
+  font: 600 15px/1.6 var(--hn-sans);
+}
+
+.yclinks + br + form,
+.yclinks + form {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 0 auto;
+  padding: 0 20px 12px;
+  color: var(--hn-muted);
+  font: 600 15px/1.4 var(--hn-sans);
+}
+
+.yclinks + br + form input[type="text"],
+.yclinks + form input[type="text"] {
+  width: min(320px, 100%);
+  min-height: 46px;
+  padding: 0 16px;
+  box-sizing: border-box;
+}
+
+.morelink,
+input[type="submit"] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 18px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ff8533, #ff6600);
+  color: #ffffff !important;
+  font: 700 12px/1 var(--hn-sans);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none !important;
+}
+
+.morelink:hover,
+input[type="submit"]:hover {
+  filter: brightness(1.03);
+}
+
+input,
+textarea,
+select {
+  color: var(--hn-text);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--hn-line);
+  border-radius: 14px;
+}
+
+body.hn-theme-light input:not([type="submit"]),
+body.hn-theme-light textarea,
+body.hn-theme-light select {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: rgba(28, 36, 40, 0.14);
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid rgba(255, 102, 0, 0.7);
+  outline-offset: 2px;
+}

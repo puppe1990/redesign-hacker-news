@@ -22,8 +22,31 @@
       "matches": [
         "https://news.ycombinator.com/*"
       ],
+      "css": [
+        "src/styles/tokens.css",
+        "src/styles/shell.css",
+        "src/styles/type-modal.css",
+        "src/styles/listing.css",
+        "src/styles/discussion.css",
+        "src/styles/chrome-controls.css",
+        "src/styles/forms.css",
+        "src/styles/pages.css",
+        "src/styles/responsive.css"
+      ],
       "js": [
-        "src/content.js"
+        "src/constants.js",
+        "src/theme.js",
+        "src/type-settings.js",
+        "src/dom.js",
+        "src/topbar.js",
+        "src/listings.js",
+        "src/discussion.js",
+        "src/pages/favorites.js",
+        "src/pages/forgot.js",
+        "src/pages/showlim.js",
+        "src/pages/user.js",
+        "src/pages/submit.js",
+        "src/boot.js"
       ],
       "run_at": "document_idle"
     }
