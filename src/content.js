@@ -112,6 +112,10 @@
       document.head.appendChild(styleTag);
     }
 
+    const commentDepthVars = Array.from({ length: 16 }, (_, depth) => {
+      return `body.${DISCUSSION_CLASS} .comment-tree .comtr:has(.ind[indent="${depth}"]) { --hn-depth: ${depth}; }`;
+    }).join("\n      ");
+
     styleTag.textContent = `
       :root {
         --hn-bg: #071216;
@@ -129,6 +133,8 @@
         --hn-serif: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
         --hn-sans: "Avenir Next", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
         --hn-mono: "SFMono-Regular", "Menlo", "Consolas", monospace;
+        --hn-indent-step: 28px;
+        --hn-indent-cap: 8;
       }
 
       body.${LIGHT_THEME_CLASS} {
@@ -654,20 +660,56 @@
         box-sizing: border-box;
       }
 
-      body.${DISCUSSION_CLASS} .comment-tree {
-        width: min(var(--hn-content-width), 100%);
+      body.${DISCUSSION_CLASS} .comment-tree,
+      body.${DISCUSSION_CLASS} .comment-tree > tbody {
+        display: block !important;
+        width: min(var(--hn-content-width), 100%) !important;
+        max-width: 100%;
         margin: 0 auto !important;
+        box-sizing: border-box;
       }
+
+      ${commentDepthVars}
 
       body.${DISCUSSION_CLASS} .comment-tree .athing.comtr,
       body.${DISCUSSION_CLASS} .comment-tree .comtr {
-        display: block !important;
-        margin: 0 0 20px 0 !important;
+        display: block;
+        box-sizing: border-box;
+        width: calc(100% - min(var(--hn-depth, 0), var(--hn-indent-cap)) * var(--hn-indent-step)) !important;
+        max-width: 100%;
+        margin: 18px 0 10px 0 !important;
+        margin-left: calc(min(var(--hn-depth, 0), var(--hn-indent-cap)) * var(--hn-indent-step)) !important;
         padding: 24px 28px !important;
         border: 1px solid rgba(159, 177, 171, 0.1);
         border-radius: 22px;
         background: rgba(8, 20, 27, 0.72);
         box-shadow: none;
+      }
+
+      body.${DISCUSSION_CLASS} .comment-tree .comtr:first-child {
+        margin-top: 0 !important;
+      }
+
+      body.${DISCUSSION_CLASS} .comment-tree .comtr:has(.ind[indent]):not(:has(.ind[indent="0"])),
+      body.${DISCUSSION_CLASS} .comment-tree .comtr[data-hn-depth]:not([data-hn-depth="0"]) {
+        margin-top: 0 !important;
+        margin-bottom: 8px !important;
+        padding: 14px 18px 14px 20px !important;
+        border: 1px solid transparent;
+        border-left: 2px solid rgba(255, 102, 0, 0.34);
+        border-radius: 0 16px 16px 0;
+        background: rgba(8, 20, 27, 0.42);
+        box-shadow: none;
+      }
+
+      body.${DISCUSSION_CLASS} .comment-tree .comtr.coll {
+        padding-top: 14px !important;
+        padding-bottom: 14px !important;
+      }
+
+      body.${DISCUSSION_CLASS} .comment-tree .comtr.noshow,
+      body.${DISCUSSION_CLASS} .comment-tree .comment.noshow {
+        display: none !important;
       }
 
       body.${LIGHT_THEME_CLASS}.${DISCUSSION_CLASS} .fatitem {
@@ -684,25 +726,33 @@
         box-shadow: 0 14px 38px rgba(113, 91, 52, 0.08);
       }
 
+      body.${LIGHT_THEME_CLASS}.${DISCUSSION_CLASS} .comment-tree .comtr:has(.ind[indent]):not(:has(.ind[indent="0"])),
+      body.${LIGHT_THEME_CLASS}.${DISCUSSION_CLASS} .comment-tree .comtr[data-hn-depth]:not([data-hn-depth="0"]) {
+        background: rgba(255, 251, 245, 0.58);
+        border-color: transparent;
+        border-left-color: rgba(255, 102, 0, 0.38);
+        box-shadow: none;
+      }
+
       body.${DISCUSSION_CLASS} .comment-tree .comtr > td {
         display: block !important;
-        width: auto !important;
+        width: 100% !important;
         padding: 0 !important;
       }
 
-      body.${DISCUSSION_CLASS} .comment-tree .ind {
-        width: auto !important;
-        min-width: 0 !important;
-        padding-right: 0 !important;
+      body.${DISCUSSION_CLASS} .comment-tree .comtr > td > table {
+        width: 100% !important;
+        border-collapse: collapse !important;
       }
 
+      body.${DISCUSSION_CLASS} .comment-tree .ind,
       body.${DISCUSSION_CLASS} .comment-tree .ind img {
-        width: 0 !important;
-        height: 0 !important;
-        opacity: 0 !important;
+        display: none !important;
       }
 
       body.${DISCUSSION_CLASS} .comment-tree .default {
+        display: block !important;
+        width: 100% !important;
         margin: 0 !important;
         padding: 0 !important;
         border: 0 !important;
@@ -747,6 +797,7 @@
       body.${DISCUSSION_CLASS} .comment-tree .commtext {
         color: var(--hn-text);
         font: 400 19px/1.85 var(--hn-serif);
+        overflow-wrap: break-word;
       }
 
       body.${LIGHT_THEME_CLASS}.${DISCUSSION_CLASS} .comment-tree .comment,
@@ -770,13 +821,20 @@
         background: rgba(0, 0, 0, 0.22);
       }
 
-      body.${DISCUSSION_CLASS} .comment-tree .navs,
+      body.${DISCUSSION_CLASS} .comment-tree .comhead .navs,
       body.${DISCUSSION_CLASS} .comment-tree .reply {
-        margin-top: 18px;
         color: var(--hn-muted);
         font: 700 11px/1.4 var(--hn-sans);
         letter-spacing: 0.05em;
         text-transform: uppercase;
+      }
+
+      body.${DISCUSSION_CLASS} .comment-tree .comhead .navs {
+        margin-top: 0;
+      }
+
+      body.${DISCUSSION_CLASS} .comment-tree .reply {
+        margin-top: 18px;
       }
 
       .yclinks,
@@ -1782,10 +1840,14 @@
           font-size: 23px;
         }
 
-        .fatitem,
-        .comment-tree {
+        .fatitem {
           padding: 16px;
           border-radius: 20px;
+        }
+
+        body.${DISCUSSION_CLASS} {
+          --hn-indent-step: 18px;
+          --hn-indent-cap: 6;
         }
 
         body.${DISCUSSION_CLASS} .fatitem .titleline > a {
@@ -1863,10 +1925,20 @@
           font-size: 28px;
         }
 
-        body.${DISCUSSION_CLASS} .comment-tree .athing.comtr,
-        body.${DISCUSSION_CLASS} .comment-tree .comtr {
-          padding: 16px 16px !important;
+        body.${DISCUSSION_CLASS} {
+          --hn-indent-step: 12px;
+          --hn-indent-cap: 5;
+        }
+
+        body.${DISCUSSION_CLASS} .comment-tree .comtr[data-hn-depth="0"],
+        body.${DISCUSSION_CLASS} .comment-tree .comtr:not([data-hn-depth]) {
+          padding: 16px !important;
           border-radius: 18px;
+        }
+
+        body.${DISCUSSION_CLASS} .comment-tree .comtr:has(.ind[indent]):not(:has(.ind[indent="0"])),
+        body.${DISCUSSION_CLASS} .comment-tree .comtr[data-hn-depth]:not([data-hn-depth="0"]) {
+          padding: 12px 14px 12px 16px !important;
         }
 
         .yclinks {
@@ -2109,6 +2181,31 @@
     });
   }
 
+  function getCommentDepth(row) {
+    const ind = row.querySelector("td.ind");
+
+    if (!ind) {
+      return 0;
+    }
+
+    const attr = ind.getAttribute("indent");
+
+    if (attr != null && attr !== "") {
+      const depth = Number(attr);
+      if (Number.isFinite(depth) && depth >= 0) {
+        return depth;
+      }
+    }
+
+    const width = Number(ind.querySelector("img")?.getAttribute("width"));
+
+    if (Number.isFinite(width) && width > 0) {
+      return Math.max(0, Math.round(width / 40));
+    }
+
+    return 0;
+  }
+
   function enhanceDiscussion() {
     const fatItem = document.querySelector(".fatitem");
     const commentTree = document.querySelector(".comment-tree");
@@ -2118,6 +2215,16 @@
     }
 
     document.body.classList.add(DISCUSSION_CLASS);
+
+    if (!commentTree) {
+      return;
+    }
+
+    commentTree.querySelectorAll("tr.comtr").forEach((row) => {
+      const depth = getCommentDepth(row);
+      row.dataset.hnDepth = String(depth);
+      row.style.setProperty("--hn-depth", String(depth));
+    });
   }
 
   function enhanceForgotPage() {
