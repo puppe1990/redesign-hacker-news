@@ -1,0 +1,305 @@
+/* Story header and nested comment tree. Indent uses --hn-depth from HN td.ind[indent]. */
+body.hn-editorial-discussion table.itemlist {
+  width: min(var(--hn-content-width), 100%) !important;
+  margin: 0 auto !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+}
+
+body.hn-editorial-discussion .fatitem {
+  display: block !important;
+  width: min(var(--hn-content-width), 100%);
+  margin: 0 auto 40px !important;
+  padding: 36px 36px 32px;
+  border-radius: 28px;
+  border: 1px solid var(--hn-line);
+  background:
+    radial-gradient(circle at top left, rgba(255, 102, 0, 0.05), transparent 28%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 42%),
+    var(--hn-panel);
+  box-shadow: var(--hn-shadow);
+  box-sizing: border-box;
+}
+
+body.hn-editorial-discussion .fatitem > tbody,
+body.hn-editorial-discussion .fatitem > tbody > tr {
+  display: block !important;
+  width: 100% !important;
+}
+
+body.hn-editorial-discussion .fatitem .athing {
+  display: block !important;
+  margin: 0 0 18px 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body.hn-editorial-discussion .fatitem td {
+  display: block !important;
+  padding: 0 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+body.hn-editorial-discussion .fatitem span.rank,
+body.hn-editorial-discussion .fatitem .votelinks,
+body.hn-editorial-discussion .comment-tree .votelinks {
+  display: none !important;
+}
+
+body.hn-editorial-discussion .fatitem .titleline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+body.hn-editorial-discussion .fatitem .titleline > a {
+  color: var(--hn-text);
+  text-decoration: none;
+  font: 600 calc(50px * var(--hn-type-scale)) / 1.02 var(--hn-reading);
+  letter-spacing: -0.03em;
+}
+
+body.hn-editorial-discussion .fatitem .titleline > a:hover {
+  color: #ff9955;
+}
+
+body.hn-editorial-discussion .fatitem .hn-editorial-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  margin-top: 24px;
+  color: var(--hn-muted);
+  font: 600 13px/1.5 var(--hn-sans);
+}
+
+body.hn-editorial-discussion .fatitem .hn-editorial-meta > * {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+body.hn-editorial-discussion .fatitem .hn-editorial-meta > *::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(255, 102, 0, 0.45);
+}
+
+body.hn-editorial-discussion .fatitem .hn-editorial-meta > :first-child::before {
+  display: none;
+}
+
+body.hn-editorial-discussion .fatitem .toptext {
+  margin-top: 26px;
+  color: var(--hn-text);
+  font: 400 calc(22px * var(--hn-type-scale)) / 1.85 var(--hn-reading);
+}
+
+body.hn-editorial-discussion .fatitem form {
+  margin-top: 22px;
+}
+
+body.hn-editorial-discussion textarea {
+  width: 100% !important;
+  min-height: 160px;
+  padding: 18px;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+body.hn-editorial-discussion .comment-tree,
+body.hn-editorial-discussion .comment-tree > tbody {
+  display: block !important;
+  width: min(var(--hn-content-width), 100%) !important;
+  max-width: 100%;
+  margin: 0 auto !important;
+  box-sizing: border-box;
+}
+
+body.hn-editorial-discussion .comment-tree .comtr:has(.ind[indent="0"]) { --hn-depth: 0; }
+body.hn-editorial-discussion .comment-tree .comtr:has(.ind[indent="1"]) { --hn-depth: 1; }
+body.hn-editorial-discussion .comment-tree .comtr:has(.ind[indent="2"]) { --hn-depth: 2; }
+body.hn-editorial-discussion .comment-tree .comtr:has(.ind[indent="3"]) { --hn-depth: 3; }
+body.hn-editorial-discussion .comment-tree .comtr:has(.ind[indent="4"]) { --hn-depth: 4; }
+body.hn-editorial-discussion .comment-tree .comtr:has(.ind[indent="5"]) { --hn-depth: 5; }
+body.hn-editorial-discussion .comment-tree .comtr:has(.ind[indent="6"]) { --hn-depth: 6; }
+body.hn-editorial-discussion .comment-tree .comtr:has(.ind[indent="7"]) { --hn-depth: 7; }
+body.hn-editorial-discussion .comment-tree .comtr:has(.ind[indent="8"]) { --hn-depth: 8; }
+body.hn-editorial-discussion .comment-tree .comtr:has(.ind[indent="9"]) { --hn-depth: 9; }
+body.hn-editorial-discussion .comment-tree .comtr:has(.ind[indent="10"]) { --hn-depth: 10; }
+body.hn-editorial-discussion .comment-tree .comtr:has(.ind[indent="11"]) { --hn-depth: 11; }
+body.hn-editorial-discussion .comment-tree .comtr:has(.ind[indent="12"]) { --hn-depth: 12; }
+body.hn-editorial-discussion .comment-tree .comtr:has(.ind[indent="13"]) { --hn-depth: 13; }
+body.hn-editorial-discussion .comment-tree .comtr:has(.ind[indent="14"]) { --hn-depth: 14; }
+body.hn-editorial-discussion .comment-tree .comtr:has(.ind[indent="15"]) { --hn-depth: 15; }
+
+body.hn-editorial-discussion .comment-tree .athing.comtr,
+body.hn-editorial-discussion .comment-tree .comtr {
+  display: block;
+  box-sizing: border-box;
+  width: calc(100% - min(var(--hn-depth, 0), var(--hn-indent-cap)) * var(--hn-indent-step)) !important;
+  max-width: 100%;
+  margin: 18px 0 10px 0 !important;
+  margin-left: calc(min(var(--hn-depth, 0), var(--hn-indent-cap)) * var(--hn-indent-step)) !important;
+  padding: 24px 28px !important;
+  border: 1px solid rgba(159, 177, 171, 0.1);
+  border-radius: 22px;
+  background: rgba(8, 20, 27, 0.72);
+  box-shadow: none;
+}
+
+body.hn-editorial-discussion .comment-tree .comtr:first-child {
+  margin-top: 0 !important;
+}
+
+body.hn-editorial-discussion .comment-tree .comtr:has(.ind[indent]):not(:has(.ind[indent="0"])),
+body.hn-editorial-discussion .comment-tree .comtr[data-hn-depth]:not([data-hn-depth="0"]) {
+  margin-top: 0 !important;
+  margin-bottom: 8px !important;
+  padding: 14px 18px 14px 20px !important;
+  border: 1px solid transparent;
+  border-left: 2px solid rgba(255, 102, 0, 0.34);
+  border-radius: 0 16px 16px 0;
+  background: rgba(8, 20, 27, 0.42);
+  box-shadow: none;
+}
+
+body.hn-editorial-discussion .comment-tree .comtr.coll {
+  padding-top: 14px !important;
+  padding-bottom: 14px !important;
+}
+
+body.hn-editorial-discussion .comment-tree .comtr.noshow,
+body.hn-editorial-discussion .comment-tree .comment.noshow {
+  display: none !important;
+}
+
+body.hn-theme-light.hn-editorial-discussion .fatitem {
+  background:
+    radial-gradient(circle at top left, rgba(255, 102, 0, 0.05), transparent 28%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(255, 253, 248, 0.96)),
+    var(--hn-panel);
+}
+
+body.hn-theme-light.hn-editorial-discussion .comment-tree .athing.comtr,
+body.hn-theme-light.hn-editorial-discussion .comment-tree .comtr {
+  background: rgba(255, 251, 245, 0.96);
+  border-color: rgba(28, 36, 40, 0.1);
+  box-shadow: 0 14px 38px rgba(113, 91, 52, 0.08);
+}
+
+body.hn-theme-light.hn-editorial-discussion .comment-tree .comtr:has(.ind[indent]):not(:has(.ind[indent="0"])),
+body.hn-theme-light.hn-editorial-discussion .comment-tree .comtr[data-hn-depth]:not([data-hn-depth="0"]) {
+  background: rgba(255, 251, 245, 0.58);
+  border-color: transparent;
+  border-left-color: rgba(255, 102, 0, 0.38);
+  box-shadow: none;
+}
+
+body.hn-editorial-discussion .comment-tree .comtr > td {
+  display: block !important;
+  width: 100% !important;
+  padding: 0 !important;
+}
+
+body.hn-editorial-discussion .comment-tree .comtr > td > table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+}
+
+body.hn-editorial-discussion .comment-tree .ind,
+body.hn-editorial-discussion .comment-tree .ind img {
+  display: none !important;
+}
+
+body.hn-editorial-discussion .comment-tree .default {
+  display: block !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+}
+
+body.hn-editorial-discussion .comment-tree .comhead {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  margin-bottom: 16px;
+  color: var(--hn-muted);
+  font: 600 12px/1.5 var(--hn-sans);
+}
+
+body.hn-theme-light.hn-editorial-discussion .comment-tree .comhead,
+body.hn-theme-light.hn-editorial-discussion .comment-tree .navs,
+body.hn-theme-light.hn-editorial-discussion .comment-tree .reply,
+body.hn-theme-light.hn-editorial-discussion .fatitem .hn-editorial-meta,
+body.hn-theme-light.hn-editorial-discussion .fatitem .toptext + form,
+body.hn-theme-light .yclinks,
+body.hn-theme-light .yclinks *,
+body.hn-theme-light center > table:last-of-type tr td {
+  color: #5c6a70 !important;
+}
+
+body.hn-editorial-discussion .comment-tree .comhead a,
+body.hn-editorial-discussion .comment-tree .navs a,
+body.hn-editorial-discussion .comment-tree .reply a,
+body.hn-editorial-discussion .fatitem .hn-editorial-meta a {
+  color: inherit;
+  text-decoration: none;
+}
+
+body.hn-editorial-discussion .comment-tree .comhead a:hover,
+body.hn-editorial-discussion .comment-tree .navs a:hover,
+body.hn-editorial-discussion .comment-tree .reply a:hover,
+body.hn-editorial-discussion .fatitem .hn-editorial-meta a:hover {
+  color: #ff9955;
+}
+
+body.hn-editorial-discussion .comment-tree .comment,
+body.hn-editorial-discussion .comment-tree .commtext {
+  color: var(--hn-text);
+  font: 400 calc(19px * var(--hn-type-scale)) / 1.85 var(--hn-reading);
+  overflow-wrap: break-word;
+}
+
+body.hn-theme-light.hn-editorial-discussion .comment-tree .comment,
+body.hn-theme-light.hn-editorial-discussion .comment-tree .commtext,
+body.hn-theme-light.hn-editorial-discussion .fatitem .toptext,
+body.hn-theme-light.hn-editorial-discussion .fatitem .titleline > a,
+body.hn-theme-light .titleline > a {
+  color: #1c2428;
+}
+
+body.hn-editorial-discussion .comment-tree .comment p:first-child,
+body.hn-editorial-discussion .comment-tree .commtext p:first-child {
+  margin-top: 0;
+}
+
+body.hn-editorial-discussion .commtext pre,
+body.hn-editorial-discussion .comment pre {
+  overflow: auto;
+  padding: 14px;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.22);
+}
+
+body.hn-editorial-discussion .comment-tree .comhead .navs,
+body.hn-editorial-discussion .comment-tree .reply {
+  color: var(--hn-muted);
+  font: 700 11px/1.4 var(--hn-sans);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+body.hn-editorial-discussion .comment-tree .comhead .navs {
+  margin-top: 0;
+}
+
+body.hn-editorial-discussion .comment-tree .reply {
+  margin-top: 18px;
+}

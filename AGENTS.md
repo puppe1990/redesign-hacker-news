@@ -1,35 +1,68 @@
-# Repository Guidelines
+# Agent rules
 
-## Project Structure & Module Organization
-This repository is a small Manifest V3 Chrome extension with no build step. `manifest.json` declares the extension entrypoints and URL matches. [`src/content.js`](/Users/matheuspuppe/Desktop/Projetos/Chrome%20Extensions/redesign-hacker-news/src/content.js) contains the injected UI logic, style injection, theme handling, and DOM transforms for Hacker News. [`README.md`](/Users/matheuspuppe/Desktop/Projetos/Chrome%20Extensions/redesign-hacker-news/README.md) documents manual installation. There is currently no `tests/`, `assets/`, or package-managed tooling, so keep additions lightweight unless the project scope changes.
+Dense, imperative rules for coding agents. Source: Fabio Akita — Clean Code pra Agentes de IA (2026).
 
-## Build, Test, and Development Commands
-There is no compile or bundling pipeline.
+## Project
 
-- `open -a "Google Chrome" chrome://extensions`
-  Opens the extension manager for local testing.
-- Load unpacked -> select this repository folder
-  Installs the current working tree directly into Chrome.
-- `node --check src/content.js`
-  Quick syntax validation for the content script.
-- `git diff -- src/content.js manifest.json`
-  Review the exact extension changes before reloading.
+Manifest V3 Chrome extension. **No bundler.** Chrome injects `src/styles/*.css` then `src/*.js` in `manifest.json` order into an isolated world. Scripts share `var HNEditorial`. Do not introduce remote fonts, remote scripts, or extra permissions.
 
-After editing, reload the unpacked extension in Chrome and verify on `https://news.ycombinator.com/`.
+Class names in `src/constants.js` must match CSS (`hn-editorial-*`, `hn-theme-light`). CSS lives in `src/styles/`; JS must not inject a giant `<style>` tag.
 
-## Coding Style & Naming Conventions
-Use plain JavaScript with 2-space indentation and semicolons, matching `src/content.js`. Prefer `const` over `let` unless reassignment is required. Use descriptive constant names for DOM ids, CSS class names, and storage keys such as `TOPBAR_ID` and `THEME_STORAGE_KEY`. Keep helper functions small and colocated near the behavior they support. If you add files, use lowercase paths like `src/theme.js`.
+## Commands
 
-## Testing Guidelines
-Testing is currently manual. Validate both list and discussion pages on Hacker News, and check light/dark theme behavior plus repeated navigation safety. If automated tests are added later, place them under `tests/` and name them after the target module, for example `content.test.js`.
+- Tests: `node --test tests/*.test.js`
+- Syntax: `node --check src/constants.js src/theme.js src/type-settings.js src/dom.js src/topbar.js src/listings.js src/discussion.js src/boot.js src/pages/*.js`
+- After UI edits: reload the unpacked extension and verify `https://news.ycombinator.com/` (listing + `/item?id=` discussion, light/dark).
 
-## Commit & Pull Request Guidelines
-The current history uses short, imperative subjects like `Initial commit`. Continue with concise messages such as `Refine top bar spacing` or `Fix theme toggle persistence`. Pull requests should include:
+## Code style
 
-- a brief summary of the user-visible change
-- linked issue or task, if one exists
-- before/after screenshots or a short screen recording for UI changes
-- manual test notes covering the Hacker News pages checked
+- Functions: 4-20 lines. Split if longer.
+- Files: under 500 lines. Split by responsibility.
+- One thing per function, one responsibility per module (SRP).
+- Names: specific and unique. Prefer `HNEditorial.getCommentDepth` over `process` / `handler` / `Manager`.
+- Types: this repo is classic JS (no build). Public helpers get a one-line intent comment when the WHY is non-obvious.
+- No code duplication. Shared DOM rebuilds go through `HNEditorial.replacePageBodyKeepingTopbar`.
+- Early returns over nested ifs. Max 2 levels of indentation for control flow.
 
-## Security & Extension Notes
-Keep permissions minimal in `manifest.json`. Avoid introducing remote scripts, external asset dependencies, or broader match patterns unless required.
+## Comments
+
+- Keep intent/provenance comments. Don't strip them on refactor.
+- Write WHY, not WHAT.
+- Reference HN markup constraints (e.g. `td.ind[indent]`, `.noshow` collapse) when a line exists because of upstream HTML.
+
+## Tests
+
+- Tests run with a single command: `node --test tests/*.test.js`
+- Every new pure helper gets a test. Bug fixes get a regression test.
+- Fake HN DOM nodes in `tests/load-hn-editorial.js`; do not hit the network.
+- Tests must be F.I.R.S.T: fast, independent, repeatable, self-validating, timely.
+
+## Structure
+
+```text
+src/constants.js          IDs, class names, typefaces
+src/theme.js              light/dark persistence
+src/type-settings.js      font family + scale modal
+src/dom.js                shared DOM helpers
+src/topbar.js             fixed nav
+src/listings.js           feed cards + search
+src/discussion.js         comment indent
+src/pages/*.js            submit, auth, user, forgot, favorites, showlim
+src/boot.js               mount only
+src/styles/*.css          one concern per file
+tests/*.test.js           mirrors src helpers
+```
+
+## Formatting
+
+- Plain JavaScript, 2-space indent, semicolons. Match neighboring files. No extra formatter.
+
+## Logging
+
+- No console noise in content scripts. Failures should be silent to the HN page.
+
+## Defensive programming
+
+- Do not add retries, circuit breakers, or remote fallbacks. This extension only restyles a third-party DOM.
+- Preserve HN collapse: never `display: block !important` on `.comtr` without a `.noshow { display: none !important }` companion.
+- Keep `manifest.json` match patterns limited to `https://news.ycombinator.com/*`.
