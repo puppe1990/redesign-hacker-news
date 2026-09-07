@@ -1,8 +1,5 @@
 var HNEditorial = HNEditorial || {};
 
-HNEditorial.PASSWORD_EYE_OPEN = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
-HNEditorial.PASSWORD_EYE_OFF = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`;
-
 HNEditorial.attachPasswordVisibilityToggle = function attachPasswordVisibilityToggle(input) {
   const wrap = document.createElement("div");
   wrap.className = "hn-pw-wrap";
@@ -10,13 +7,11 @@ HNEditorial.attachPasswordVisibilityToggle = function attachPasswordVisibilityTo
   const toggle = document.createElement("button");
   toggle.type = "button";
   toggle.className = "hn-pw-toggle";
-  toggle.innerHTML = HNEditorial.PASSWORD_EYE_OPEN;
-  toggle.setAttribute("aria-label", "Show password");
+  toggle.textContent = "Show";
   toggle.addEventListener("click", () => {
-    const isHidden = input.type === "password";
-    input.type = isHidden ? "text" : "password";
-    toggle.innerHTML = isHidden ? HNEditorial.PASSWORD_EYE_OFF : HNEditorial.PASSWORD_EYE_OPEN;
-    toggle.setAttribute("aria-label", isHidden ? "Hide password" : "Show password");
+    const show = input.type === "password";
+    input.type = show ? "text" : "password";
+    toggle.textContent = show ? "Hide" : "Show";
   });
   wrap.appendChild(toggle);
   return wrap;
@@ -54,14 +49,6 @@ HNEditorial.buildAuthPanel = function buildAuthPanel(form, tabId) {
 
   newForm.appendChild(form.querySelector("input[type=submit]").cloneNode(true));
   panel.appendChild(newForm);
-  return panel;
-};
-
-HNEditorial.emptyAuthPanel = function emptyAuthPanel(tabId, active) {
-  const panel = document.createElement("div");
-  panel.className = "hn-auth-panel";
-  panel.dataset.tab = tabId;
-  panel.dataset.active = String(active);
   return panel;
 };
 
@@ -164,19 +151,26 @@ HNEditorial.mountAuthCard = function mountAuthCard() {
         panel.dataset.active = "false";
       });
       btn.dataset.active = "true";
-      card.querySelector(`.hn-auth-panel[data-tab="${btn.dataset.tab}"]`).dataset.active = "true";
+      const panel = card.querySelector(`.hn-auth-panel[data-tab="${btn.dataset.tab}"]`);
+      if (panel) {
+        panel.dataset.active = "true";
+      }
     });
     tabs.appendChild(btn);
   });
   card.appendChild(tabs);
 
-  const signinPanel = signinForm ? HNEditorial.buildAuthPanel(signinForm, "signin") : HNEditorial.emptyAuthPanel("signin", defaultTab === "signin");
-  signinPanel.dataset.active = String(defaultTab === "signin");
-  card.appendChild(signinPanel);
+  if (signinForm) {
+    const panel = HNEditorial.buildAuthPanel(signinForm, "signin");
+    panel.dataset.active = String(defaultTab === "signin");
+    card.appendChild(panel);
+  }
 
-  const signupPanel = signupForm ? HNEditorial.buildAuthPanel(signupForm, "signup") : HNEditorial.emptyAuthPanel("signup", defaultTab === "signup");
-  signupPanel.dataset.active = String(defaultTab === "signup");
-  card.appendChild(signupPanel);
+  if (signupForm) {
+    const panel = HNEditorial.buildAuthPanel(signupForm, "signup");
+    panel.dataset.active = String(defaultTab === "signup");
+    card.appendChild(panel);
+  }
 
   if (forgotLink) {
     const footer = document.createElement("div");

@@ -24,23 +24,18 @@ HNEditorial.getPreferredTypeScale = function getPreferredTypeScale() {
   );
 };
 
-HNEditorial.applyTypeSettings = function applyTypeSettings(typefaceId, scale) {
+HNEditorial.setType = function setType(typefaceId, scale, persist) {
   const face = HNEditorial.TYPEFACES.find((item) => item.id === typefaceId) || HNEditorial.TYPEFACES[0];
   const nextScale = HNEditorial.clampTypeScale(scale);
+
+  if (persist !== false) {
+    window.localStorage.setItem(HNEditorial.TYPEFACE_STORAGE_KEY, face.id);
+    window.localStorage.setItem(HNEditorial.TYPE_SCALE_STORAGE_KEY, String(nextScale));
+  }
+
   document.documentElement.style.setProperty("--hn-reading", face.family);
   document.documentElement.style.setProperty("--hn-type-scale", String(nextScale));
-};
-
-HNEditorial.persistTypeSettings = function persistTypeSettings(typefaceId, scale) {
-  window.localStorage.setItem(HNEditorial.TYPEFACE_STORAGE_KEY, typefaceId);
-  window.localStorage.setItem(
-    HNEditorial.TYPE_SCALE_STORAGE_KEY,
-    String(HNEditorial.clampTypeScale(scale))
-  );
-};
-
-HNEditorial.initializeTypeSettings = function initializeTypeSettings() {
-  HNEditorial.applyTypeSettings(HNEditorial.getPreferredTypeface(), HNEditorial.getPreferredTypeScale());
+  HNEditorial.syncTypeModal();
 };
 
 HNEditorial.syncTypeModal = function syncTypeModal() {
@@ -74,11 +69,6 @@ HNEditorial.syncTypeModal = function syncTypeModal() {
     const face = HNEditorial.TYPEFACES.find((item) => item.id === typefaceId) || HNEditorial.TYPEFACES[0];
     preview.style.fontFamily = face.family;
   }
-};
-
-HNEditorial.isTypeModalOpen = function isTypeModalOpen() {
-  const modal = document.getElementById(HNEditorial.TYPE_MODAL_ID);
-  return Boolean(modal) && !modal.hidden;
 };
 
 HNEditorial.closeTypeModal = function closeTypeModal() {
@@ -115,20 +105,6 @@ HNEditorial.openTypeModal = function openTypeModal() {
   }
 
   modal.querySelector(".hn-type-modal__close")?.focus();
-};
-
-HNEditorial.setTypeface = function setTypeface(typefaceId) {
-  const scale = HNEditorial.getPreferredTypeScale();
-  HNEditorial.persistTypeSettings(typefaceId, scale);
-  HNEditorial.applyTypeSettings(typefaceId, scale);
-  HNEditorial.syncTypeModal();
-};
-
-HNEditorial.setTypeScale = function setTypeScale(scale) {
-  const typefaceId = HNEditorial.getPreferredTypeface();
-  HNEditorial.persistTypeSettings(typefaceId, scale);
-  HNEditorial.applyTypeSettings(typefaceId, scale);
-  HNEditorial.syncTypeModal();
 };
 
 HNEditorial.createTypeModalElement = function createTypeModalElement() {
@@ -195,7 +171,8 @@ HNEditorial.bindTypeToggle = function bindTypeToggle() {
 
   toggle.dataset.bound = "true";
   toggle.addEventListener("click", () => {
-    if (HNEditorial.isTypeModalOpen()) {
+    const modal = document.getElementById(HNEditorial.TYPE_MODAL_ID);
+    if (modal && !modal.hidden) {
       HNEditorial.closeTypeModal();
     } else {
       HNEditorial.openTypeModal();
@@ -224,19 +201,20 @@ HNEditorial.bindTypeModalEvents = function bindTypeModalEvents(modal) {
 
     const faceButton = target.closest(".hn-type-face");
     if (faceButton?.dataset.typeface) {
-      HNEditorial.setTypeface(faceButton.dataset.typeface);
+      HNEditorial.setType(faceButton.dataset.typeface, HNEditorial.getPreferredTypeScale());
     }
   });
 
   const slider = modal.querySelector("#hn-editorial-type-scale");
   if (slider) {
     slider.addEventListener("input", () => {
-      HNEditorial.setTypeScale(Number(slider.value) / 100);
+      HNEditorial.setType(HNEditorial.getPreferredTypeface(), Number(slider.value) / 100);
     });
   }
 
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && HNEditorial.isTypeModalOpen()) {
+    const open = document.getElementById(HNEditorial.TYPE_MODAL_ID);
+    if (event.key === "Escape" && open && !open.hidden) {
       event.preventDefault();
       HNEditorial.closeTypeModal();
     }

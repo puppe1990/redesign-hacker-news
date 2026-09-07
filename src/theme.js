@@ -27,12 +27,6 @@ HNEditorial.syncThemeToggle = function syncThemeToggle(theme) {
   toggle.setAttribute("data-theme", theme);
 };
 
-HNEditorial.initializeTheme = function initializeTheme() {
-  const theme = HNEditorial.getPreferredTheme();
-  HNEditorial.applyTheme(theme);
-  return theme;
-};
-
 HNEditorial.setupThemeToggle = function setupThemeToggle() {
   const toggle = document.getElementById("hn-editorial-theme-toggle");
 

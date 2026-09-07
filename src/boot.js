@@ -6,8 +6,8 @@ HNEditorial.boot = function boot() {
   }
 
   document.body.classList.add(HNEditorial.PAGE_CLASS);
-  HNEditorial.initializeTheme();
-  HNEditorial.initializeTypeSettings();
+  HNEditorial.applyTheme(HNEditorial.getPreferredTheme());
+  HNEditorial.setType(HNEditorial.getPreferredTypeface(), HNEditorial.getPreferredTypeScale(), false);
   HNEditorial.ensureTopbar();
   HNEditorial.setupThemeToggle();
   HNEditorial.enhanceFavorites();
