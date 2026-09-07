@@ -46,3 +46,14 @@ describe("getPreferredTypeface", () => {
     assert.equal(getPreferredTypeface(), "editorial");
   });
 });
+
+describe("setType", () => {
+  it("skips localStorage when persist is false", () => {
+    const hn = loadHNEditorial();
+    hn.setType("georgia", 1.2, false);
+    assert.equal(hn.getPreferredTypeface(), "editorial");
+    hn.setType("georgia", 1.2);
+    assert.equal(hn.getPreferredTypeface(), "georgia");
+    assert.equal(hn.getPreferredTypeScale(), 1.2);
+  });
+});
